@@ -1,16 +1,12 @@
 # Sistema_De_Historias_Clinicas_Electronicas
 
+##Estudiante: Johan Sebastian Calderon Lamus
+
 ## Descripción
 Sistema modular para gestionar pacientes, citas, encuentros clínicos y prescripciones, con integración de telemetría IoT y un motor de reglas para detectar interacciones medicamentosas. Diseñado para ser seguro, trazable y fácil de extender.
 
 ## Alcance / MVP
 El MVP cubre: CRUD de pacientes, gestión de citas, registro de encuentros clínicos (encounters), prescripciones básicas, ingestión de observaciones IoT simuladas y un motor de reglas simple que genera alertas de interacción. No incluye imágenes DICOM ni integración con sistemas externos reales (se simulan para la entrega).
-
-## Requisitos funcionales
-Listado de funcionalidades obligatorias: gestión de usuarios/roles, CRUD pacientes, agenda de citas, creación de encuentros, registro de prescripciones, motor de alertas por interacciones y almacenamiento de telemetría.
-
-## Requisitos no funcionales
-Requisitos de calidad: cifrado en tránsito/at-rest, auditoría de accesos, backups diarios, latencia razonable para alertas y despliegue mediante contenedores.
 
 ## Arquitectura
 
@@ -48,9 +44,3 @@ Patrones aplicados: Hexagonal (Ports & Adapters) para aislar dominio, Repository
 ### Base de Datos
 - **PostgreSQL**
   Base de datos relacional elegida por su confiabilidad, integridad de datos (ACID) y soporte para estructuras complejas.
-
----
-
-### Seguridad
-- **Keycloak**
-  Sistema de gestión de identidades que implementa autenticación y autorización basada en OAuth2 / OpenID Connect.
