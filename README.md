@@ -1,6 +1,6 @@
 # Sistema_De_Historias_Clinicas_Electronicas
 
-##Estudiante: Johan Sebastian Calderon Lamus
+## Estudiante: Johan Sebastian Calderon Lamus
 
 ## Descripción
 Sistema modular para gestionar pacientes, citas, encuentros clínicos y prescripciones, con integración de telemetría IoT y un motor de reglas para detectar interacciones medicamentosas. Diseñado para ser seguro, trazable y fácil de extender.
@@ -23,9 +23,6 @@ Actúa como intermediario entre la vista y el modelo. Recibe las solicitudes HTT
 
 ---
 
-## Patrones de diseño
-Patrones aplicados: Hexagonal (Ports & Adapters) para aislar dominio, Repository y Unit of Work para persistencia, Observer / Pub-Sub para eventos y Strategy para el motor de reglas. Justificación: facilitan pruebas, mantenimiento y evolución.
-
 ## Tecnologías
 ### Backend
 - **Java + Spring Boot**
@@ -33,14 +30,11 @@ Patrones aplicados: Hexagonal (Ports & Adapters) para aislar dominio, Repository
 
 ---
 ### Frontend
-- **React + TypeScript**
-  Para la construcción de interfaces dinámicas, modernas y escalables.
-
 - **Tailwind CSS
   Para el diseño visual y maquetación rápida de la interfaz.
 
 ---
 
 ### Base de Datos
-- **PostgreSQL**
+- **MySQL**
   Base de datos relacional elegida por su confiabilidad, integridad de datos (ACID) y soporte para estructuras complejas.
