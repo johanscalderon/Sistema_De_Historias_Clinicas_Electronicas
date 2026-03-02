@@ -12,7 +12,18 @@ public class DeviceHandlerFactory {
             case "heartrate":
             case "heart_rate":
                 return new HeartRateDeviceHandler();
-            // agregar más tipos (glucose, spo2, etc.) aquí
+            case "temperature":
+            case "temp":
+            case "thermometer":
+                System.out.println("Handler seleccionado: TemperatureDeviceHandler");
+                return new TemperatureDeviceHandler();
+
+            case "blood_pressure":
+            case "blood-pressure":
+            case "pressure":
+            case "bp":
+            case "systolic":
+                return new PressureDeviceHandler();
             default:
                 return new GenericDeviceHandler();
         }

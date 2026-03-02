@@ -16,16 +16,16 @@ public class Observation {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id = UUID.randomUUID();
 
-    private String deviceId;
+    private String deviceId; //Identificador del dispositivo
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
-    private Patient patient;
+    private Patient patient; //Paciente
 
-    private String metric; // heart_rate, spo2, glycemia
-    private Double value;
-    private String unit;
-    private ZonedDateTime recordedAt;
+    private String metric; // Lo que se esa midiendo
+    private Double value; //valor medido
+    private String unit; //unidad (latidos por minuto)
+    private ZonedDateTime recordedAt; //fecha del dato
 
     // getters/setters
     public UUID getId() { return id; }
