@@ -3,7 +3,6 @@ package com.historiasclinias.plataforma.service;
 import com.historiasclinias.plataforma.model.Interaction;
 import com.historiasclinias.plataforma.model.Prescription;
 import com.historiasclinias.plataforma.pattern.AlertEngine;
-import com.historiasclinias.plataforma.repository.InteractionRepository;
 import com.historiasclinias.plataforma.repository.PrescriptionRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,23 +12,34 @@ import java.util.UUID;
 
 @Service
 public class PrescriptionService {
-    private final PrescriptionRepository repo;
-    private final InteractionRepository interactionRepo;
 
-    public PrescriptionService(PrescriptionRepository repo, InteractionRepository interactionRepo) {
+    private final PrescriptionRepository repo;
+    private final AlertEngine alertEngine; //Se inyecta
+
+    // Spring inyecta automáticamente AlertEngine (singleton)
+    public PrescriptionService(PrescriptionRepository repo, AlertEngine alertEngine) {
         this.repo = repo;
-        this.interactionRepo = interactionRepo;
+        this.alertEngine = alertEngine;
     }
 
     public Prescription save(Prescription p) {
         Prescription saved = repo.save(p);
-        // uso del singleton AlertEngine
-        AlertEngine engine = AlertEngine.getInstance();
-        Optional<Interaction> maybe = engine.checkAndPersistInteraction(saved, interactionRepo);
-        // Podrías notificar a usuarios si maybe.isPresent()
+
+        Optional<Interaction> maybe = alertEngine.checkAndPersistInteraction(saved);
+
+        //Mostrar en consola si hay alerta
+        if (maybe.isPresent()) {
+            System.out.println("⚠️ ALERTA GENERADA: " + maybe.get().getDescription());
+        }
+
         return saved;
     }
 
-    public List<Prescription> findAll() { return repo.findAll(); }
-    public Prescription findById(UUID id) { return repo.findById(id).orElse(null); }
+    public List<Prescription> findAll() {
+        return repo.findAll();
+    }
+
+    public Prescription findById(UUID id) {
+        return repo.findById(id).orElse(null);
+    }
 }
