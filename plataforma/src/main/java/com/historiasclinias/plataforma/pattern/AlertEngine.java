@@ -1,53 +1,53 @@
 package com.historiasclinias.plataforma.pattern;
 
+import com.historiasclinias.plataforma.factory.AlertFactory;
 import com.historiasclinias.plataforma.model.Interaction;
 import com.historiasclinias.plataforma.model.Prescription;
-import com.historiasclinias.plataforma.repository.InteractionRepository;
-
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
+import jakarta.annotation.PostConstruct;
+import java.util.Map;
 import java.util.Optional;
 
-@Service // Spring lo crea como singleton por defecto
+@Service
 public class AlertEngine {
 
-    private final InteractionRepository interactionRepository;
+    private final Map<String, AlertFactory> factories;
 
-    // Spring inyecta el repo en el constructor
-    public AlertEngine(InteractionRepository interactionRepository) {
-        this.interactionRepository = interactionRepository;
+    // Spring inyectará todas las AlertFactory registradas (beanName -> bean)
+    public AlertEngine(Map<String, AlertFactory> factories) {
+        this.factories = factories;
     }
 
     @PostConstruct
     public void init() {
         System.out.println("-----AlertEngine instanciado UNA SOLA VEZ------");
+        System.out.println("Fábricas registradas: " + factories.keySet());
     }
 
+    /**
+     * Variante por defecto: usa la fábrica clínica
+     */
     public Optional<Interaction> checkAndPersistInteraction(Prescription p) {
-        if (p.getMedicationName() != null && p.getMedicationName().toLowerCase().contains("aspirin")) {
-            Interaction it = new Interaction();
-            it.setPrescription(p);
-            it.setSeverity("moderate");
-            it.setDescription("Posible interacción con aspirina detectada por regla simple.");
-            it.setRuleId("rule_simple_aspirin_check");
-            it.setDetectedAt(ZonedDateTime.now());
-            Interaction saved = interactionRepository.save(it);
-            return Optional.of(saved);
+        return checkAndPersistInteraction(p, "clinicalAlertFactory");
+    }
+
+    /**
+     * Variante que permite elegir la fábrica (ej: "iotAlertFactory")
+     */
+    public Optional<Interaction> checkAndPersistInteraction(Prescription p, String factoryBeanName) {
+        AlertFactory factory = factories.get(factoryBeanName);
+        if (factory == null) {
+            // fallback: tomar la primera fábrica disponible para no fallar
+            if (!factories.isEmpty()) {
+                factory = factories.values().iterator().next();
+            } else {
+                return Optional.empty();
+            }
         }
 
-        if (p.getMedicationName() != null && p.getMedicationName().toLowerCase().contains("x")) {
-            Interaction it = new Interaction();
-            it.setPrescription(p);
-            it.setSeverity("high");
-            it.setDescription("Interacción crítica detectada (nombre contiene 'x').");
-            it.setRuleId("rule_name_contains_x");
-            it.setDetectedAt(ZonedDateTime.now());
-            Interaction saved = interactionRepository.save(it);
-            return Optional.of(saved);
-        }
-        return Optional.empty();
+        Optional<Interaction> maybe = factory.getAlertCreator().createAndPersist(p);
+        maybe.ifPresent(factory.getAlertNotifier()::notify);
+        return maybe;
     }
 }

@@ -14,9 +14,8 @@ import java.util.UUID;
 public class PrescriptionService {
 
     private final PrescriptionRepository repo;
-    private final AlertEngine alertEngine; //Se inyecta
+    private final AlertEngine alertEngine;
 
-    // Spring inyecta automáticamente AlertEngine (singleton)
     public PrescriptionService(PrescriptionRepository repo, AlertEngine alertEngine) {
         this.repo = repo;
         this.alertEngine = alertEngine;
@@ -25,12 +24,11 @@ public class PrescriptionService {
     public Prescription save(Prescription p) {
         Prescription saved = repo.save(p);
 
+        // Delegamos completamente a AlertEngine + fabrica: creación y notificación
         Optional<Interaction> maybe = alertEngine.checkAndPersistInteraction(saved);
 
-        //Mostrar en consola si hay alerta
-        if (maybe.isPresent()) {
-            System.out.println("⚠️ ALERTA GENERADA: " + maybe.get().getDescription());
-        }
+        // NO imprimir aquí (evita duplicados).
+        // Si necesitas auditar, usa un logger en nivel DEBUG (ver alternativa abajo).
 
         return saved;
     }
