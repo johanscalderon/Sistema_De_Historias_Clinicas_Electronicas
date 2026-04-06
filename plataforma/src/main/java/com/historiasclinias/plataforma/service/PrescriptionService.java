@@ -30,13 +30,9 @@ public class PrescriptionService {
         // Delegamos completamente a AlertEngine + fabrica: creación y notificación
         Optional<Interaction> maybe = alertEngine.checkAndPersistInteraction(saved);
 
-        // NO imprimir aquí (evita duplicados).
-        // Si necesitas auditar, usa un logger en nivel DEBUG (ver alternativa abajo).
-
         return saved;
     }
 
-    // Ejemplo: crear desde campos (útil si recibes DTO o construyes programáticamente)
     public Prescription createFromFields(Patient patient,
                                          String medicationName,
                                          String medicationCode,
@@ -59,6 +55,16 @@ public class PrescriptionService {
         return repo.save(p);
     }
 
+    public Prescription clonePrescription(UUID prescriptionId) {
+        Prescription original = repo.findById(prescriptionId)
+                .orElseThrow(() -> new RuntimeException("Prescription not found"));
+
+        Prescription cloned = original.copy();
+        cloned.setStartDate(LocalDate.now()); // nueva fecha para la copia
+
+        return save(cloned);
+    }
+
     public List<Prescription> findAll() {
         return repo.findAll();
     }
@@ -66,6 +72,4 @@ public class PrescriptionService {
     public Prescription findById(UUID id) {
         return repo.findById(id).orElse(null);
     }
-
-    
 }

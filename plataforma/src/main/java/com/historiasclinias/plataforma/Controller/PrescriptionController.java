@@ -1,4 +1,4 @@
-package com.historiasclinias.plataforma.Controller;
+package com.historiasclinias.plataforma.controller;
 
 import com.historiasclinias.plataforma.model.Prescription;
 import com.historiasclinias.plataforma.service.PrescriptionService;
@@ -11,24 +11,32 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/prescriptions")
 public class PrescriptionController {
-    private final PrescriptionService service;
-    public PrescriptionController(PrescriptionService service) { this.service = service; }
+
+    private final PrescriptionService prescriptionService;
+
+    public PrescriptionController(PrescriptionService prescriptionService) {
+        this.prescriptionService = prescriptionService;
+    }
 
     @PostMapping
     public ResponseEntity<Prescription> create(@RequestBody Prescription p) {
-        Prescription saved = service.save(p);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(prescriptionService.save(p));
     }
 
     @GetMapping
     public ResponseEntity<List<Prescription>> list() {
-        return ResponseEntity.ok(service.findAll());
+        return ResponseEntity.ok(prescriptionService.findAll());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Prescription> get(@PathVariable UUID id) {
-        Prescription p = service.findById(id);
+        Prescription p = prescriptionService.findById(id);
         if (p == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(p);
+    }
+
+    @PostMapping("/{id}/clone")
+    public ResponseEntity<Prescription> clonePrescription(@PathVariable UUID id) {
+        return ResponseEntity.ok(prescriptionService.clonePrescription(id));
     }
 }
