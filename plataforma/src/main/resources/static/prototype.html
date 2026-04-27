@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prototype - Prescripción</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 850px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Duplicar Prescripción</h1>
+    <p>
+      Esta pantalla permite copiar una prescripción ya existente.
+      El backend toma la prescripción original, la clona y crea una nueva basada en ella.
+    </p>
+
+    <div>
+      <label for="prescriptionId">UUID de la prescripción original</label>
+      <input id="prescriptionId" placeholder="00349015-34b7-4e49-9258-5a78d7762f15" />
+    </div>
+
+    <button class="primary" onclick="clonePrescription()">Clonar prescripción</button>
+    <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+
+    <div class="note">
+      <b>Idea de la prueba:</b> el patrón Prototype permite reutilizar una prescripción ya creada como base
+      para generar otra nueva sin volver a llenarla desde cero.
+    </div>
+
+    <p class="small">
+      La prueba se hace enviando el UUID de una prescripción existente al endpoint de clonación.
+    </p>
+
+    <h3>Respuesta del backend</h3>
+    <pre id="output">Aún no se ha enviado nada.</pre>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/api/prescriptions";
+
+    async function clonePrescription() {
+      const output = document.getElementById("output");
+      const prescriptionId = document.getElementById("prescriptionId").value.trim();
+
+      if (!prescriptionId) {
+        output.textContent = "Debes ingresar el UUID de una prescripción.";
+        return;
+      }
+
+      output.textContent = "Clonando...";
+
+      try {
+        const res = await fetch(`${API_URL}/${encodeURIComponent(prescriptionId)}/clone`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        output.textContent = "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById("output").textContent = "Aún no se ha enviado nada.";
+    }
+  </script>
+</body>
+</html>

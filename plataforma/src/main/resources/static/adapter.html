@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Observation Adapter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Observation Adapter</h1>
+    <p>
+      Esta pantalla permite enviar datos de distintos dispositivos y convertirlos al formato interno
+      <b>Observation</b> usando el adaptador del backend.
+    </p>
+
+    <div class="grid">
+      <div class="full">
+        <label for="deviceType">Tipo de adaptador</label>
+        <select id="deviceType" onchange="loadExample()">
+          <option value="temperature">TemperatureObservationAdapter</option>
+          <option value="heartrate">HeartRateObservationAdapter</option>
+          <option value="pressure">PressureObservationAdapter</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label for="deviceId">Device ID</label>
+        <input id="deviceId" />
+      </div>
+
+      <div class="full">
+        <label for="patientId">UUID del paciente</label>
+        <input id="patientId" />
+      </div>
+
+      <div>
+        <label for="metric">Metric</label>
+        <input id="metric" />
+      </div>
+
+      <div>
+        <label for="value">Value</label>
+        <input id="value" type="number" step="0.1" />
+      </div>
+
+      <div>
+        <label for="unit">Unit</label>
+        <input id="unit" />
+      </div>
+
+      <div class="full">
+        <label for="recordedAt">Recorded At</label>
+        <input id="recordedAt" value="2026-04-06T21:00:00Z" />
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="primary" onclick="sendAdapterRequest()">Enviar observación</button>
+      <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    </div>
+
+    <div class="note">
+      <b>Idea del Adapter:</b> el frontend envía datos en un formato externo y el backend los adapta a
+      <code>Observation</code>, que es el formato que usa el sistema internamente.
+    </div>
+
+    <p class="small">
+      Si quieres probar temperatura, usa el endpoint del adaptador de temperatura. Si luego agregas más rutas,
+      esta misma pantalla puede enviar al adaptador correspondiente.
+    </p>
+
+    <h3>Respuesta del backend</h3>
+    <pre id="output">Aún no se ha enviado nada.</pre>
+  </div>
+
+  <script>
+    const TEMP_URL = "http://localhost:8080/api/iot/adapter/temperature";
+    const HR_URL = "http://localhost:8080/api/iot/adapter/heart-rate";
+    const PRESSURE_URL = "http://localhost:8080/api/iot/adapter/pressure";
+
+    function setValue(id, value) {
+      document.getElementById(id).value = value;
+    }
+
+    function loadExample() {
+      const type = document.getElementById("deviceType").value;
+
+      if (type === "temperature") {
+        setValue("deviceId", "dev-temp-1");
+        setValue("patientId", "ee7ee567-1885-4e78-80eb-642ed9ab23ad");
+        setValue("metric", "temperature");
+        setValue("value", "38.5");
+        setValue("unit", "°C");
+        setValue("recordedAt", "2026-04-06T21:00:00Z");
+      } else if (type === "heartrate") {
+        setValue("deviceId", "dev-hr-1");
+        setValue("patientId", "ee7ee567-1885-4e78-80eb-642ed9ab23ad");
+        setValue("metric", "heart_rate");
+        setValue("value", "85");
+        setValue("unit", "bpm");
+        setValue("recordedAt", "2026-04-06T21:00:00Z");
+      } else {
+        setValue("deviceId", "dev-bp-1");
+        setValue("patientId", "ee7ee567-1885-4e78-80eb-642ed9ab23ad");
+        setValue("metric", "systolic");
+        setValue("value", "150");
+        setValue("unit", "mmHg");
+        setValue("recordedAt", "2026-04-06T21:00:00Z");
+      }
+    }
+
+    async function sendAdapterRequest() {
+      const output = document.getElementById("output");
+      output.textContent = "Enviando...";
+
+      const type = document.getElementById("deviceType").value;
+
+      const payload = {
+        deviceId: document.getElementById("deviceId").value.trim(),
+        patientId: document.getElementById("patientId").value.trim(),
+        metric: document.getElementById("metric").value.trim(),
+        value: Number(document.getElementById("value").value),
+        unit: document.getElementById("unit").value.trim(),
+        recordedAt: document.getElementById("recordedAt").value.trim()
+      };
+
+      let url = TEMP_URL;
+      if (type === "heartrate") url = HR_URL;
+      if (type === "pressure") url = PRESSURE_URL;
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        output.textContent = "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById("output").textContent = "Aún no se ha enviado nada.";
+    }
+
+    loadExample();
+  </script>
+</body>
+</html>

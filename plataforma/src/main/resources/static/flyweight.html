@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Optimización de Medicamentos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 950px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Optimización de Medicamentos</h1>
+    <p>
+      Esta pantalla demuestra el patrón <b>Flyweight</b>. El sistema reutiliza la información compartida del medicamento
+      y solo guarda en la prescripción los datos que cambian, como paciente, dosis, frecuencia y fechas.
+    </p>
+
+    <div class="grid">
+      <div class="full">
+        <label for="patientId">UUID del paciente</label>
+        <input id="patientId" placeholder="ee7ee567-1885-4e78-80eb-642ed9ab23ad" />
+      </div>
+
+      <div>
+        <label for="medicationCode">Código del medicamento</label>
+        <select id="medicationCode" onchange="loadExample()">
+          <option value="134153">134153 - Acetaminofen</option>
+          <option value="ASP100">ASP100 - Aspirin</option>
+          <option value="IBU200">IBU200 - Ibuprofeno</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="createdBy">Creado por</label>
+        <input id="createdBy" value="doctor1" />
+      </div>
+
+      <div>
+        <label for="dose">Dosis</label>
+        <input id="dose" value="100mg" />
+      </div>
+
+      <div>
+        <label for="frequency">Frecuencia</label>
+        <input id="frequency" value="daily" />
+      </div>
+
+      <div>
+        <label for="startDate">Fecha inicio</label>
+        <input id="startDate" type="date" value="2026-04-06" />
+      </div>
+
+      <div>
+        <label for="endDate">Fecha fin</label>
+        <input id="endDate" type="date" value="2026-04-20" />
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="primary" onclick="sendFlyweightRequest()">Crear prescripción</button>
+      <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+      <button class="secondary" onclick="loadCache()">Ver cache de medicamentos</button>
+      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    </div>
+
+    <div class="note">
+      <b>Idea del Flyweight:</b> el backend reutiliza un mismo objeto para cada medicamento compartido.
+      Si usas varias veces el mismo código, la fábrica vuelve a usar la misma instancia.
+    </div>
+
+    <p class="small">
+      Para mostrar la optimización, puedes crear dos prescripciones con el mismo código y luego revisar el cache.
+    </p>
+
+    <h3>Respuesta del backend</h3>
+    <pre id="output">Aún no se ha enviado nada.</pre>
+  </div>
+
+  <script>
+    const API_CREATE_URL = "http://localhost:8080/api/flyweight/prescriptions";
+    const API_CACHE_URL = "http://localhost:8080/api/flyweight/cache";
+
+    function loadExample() {
+      const code = document.getElementById("medicationCode").value;
+      document.getElementById("patientId").value = "ee7ee567-1885-4e78-80eb-642ed9ab23ad";
+
+      if (code === "134153") {
+        document.getElementById("dose").value = "100mg";
+        document.getElementById("frequency").value = "daily";
+        document.getElementById("createdBy").value = "doctor1";
+      } else if (code === "ASP100") {
+        document.getElementById("dose").value = "75mg";
+        document.getElementById("frequency").value = "daily";
+        document.getElementById("createdBy").value = "doctor2";
+      } else {
+        document.getElementById("dose").value = "200mg";
+        document.getElementById("frequency").value = "every 8 hours";
+        document.getElementById("createdBy").value = "doctor3";
+      }
+
+      document.getElementById("startDate").value = "2026-04-06";
+      document.getElementById("endDate").value = "2026-04-20";
+    }
+
+    async function sendFlyweightRequest() {
+      const output = document.getElementById("output");
+      output.textContent = "Enviando...";
+
+      const payload = {
+        patientId: document.getElementById("patientId").value.trim(),
+        medicationCode: document.getElementById("medicationCode").value.trim(),
+        dose: document.getElementById("dose").value.trim(),
+        frequency: document.getElementById("frequency").value.trim(),
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        createdBy: document.getElementById("createdBy").value.trim()
+      };
+
+      try {
+        const res = await fetch(API_CREATE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        output.textContent = "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+    async function loadCache() {
+      const output = document.getElementById("output");
+      output.textContent = "Consultando cache...";
+
+      try {
+        const res = await fetch(API_CACHE_URL);
+        const text = await res.text();
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+        output.textContent = text;
+      } catch (error) {
+        output.textContent = "Error al consultar el cache:\n" + error.message;
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById("output").textContent = "Aún no se ha enviado nada.";
+    }
+
+    loadExample();
+  </script>
+</body>
+</html>

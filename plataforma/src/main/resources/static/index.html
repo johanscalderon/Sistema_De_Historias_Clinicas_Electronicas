@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Patrones de Diseño - Plataforma Clínica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --navy-900: #050c1a;
+      --navy-800: #0a1628;
+      --navy-700: #0f1f38;
+      --navy-600: #152847;
+      --accent: #3b82f6;
+      --accent-light: #60a5fa;
+      --accent-muted: rgba(59, 130, 246, 0.18);
+      --accent-glow: rgba(59, 130, 246, 0.08);
+      --text-muted: rgba(148, 163, 184, 0.7);
+      --text-secondary: #94a3b8;
+      --text-primary: #e2e8f0;
+      --border-subtle: rgba(148, 163, 184, 0.08);
+      --border-medium: rgba(148, 163, 184, 0.15);
+      --sidebar-width: 260px;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #f0f4f8;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--navy-900);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 140% at 20% 50%, rgba(59,130,246,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-muted);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .header-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--accent-light);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .header-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 300;
+      color: #f1f5f9;
+      letter-spacing: 0.01em;
+      line-height: 1;
+    }
+
+    .header-subtitle {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .header-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--accent-light);
+      background: var(--accent-muted);
+      border: 1px solid rgba(59,130,246,0.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .menu {
+      width: var(--sidebar-width);
+      background: var(--navy-800);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    .menu::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent);
+    }
+
+    .menu-inner {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 14px 20px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-medium) transparent;
+    }
+
+    .menu-inner::-webkit-scrollbar {
+      width: 4px;
+    }
+    .menu-inner::-webkit-scrollbar-thumb {
+      background: var(--border-medium);
+      border-radius: 4px;
+    }
+
+    .menu-section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9.5px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 10px;
+      margin-bottom: 8px;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .menu-section-label:first-child {
+      margin-top: 4px;
+    }
+
+    .menu-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .menu-btn {
+      width: 100%;
+      padding: 9px 12px;
+      margin-bottom: 3px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-secondary);
+      text-align: left;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.18s ease;
+      position: relative;
+    }
+
+    .menu-btn .btn-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border-medium);
+      flex-shrink: 0;
+      transition: background 0.18s ease, transform 0.18s ease;
+    }
+
+    .menu-btn:hover {
+      background: rgba(255,255,255,0.04);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+
+    .menu-btn:hover .btn-dot {
+      background: var(--accent);
+      transform: scale(1.2);
+    }
+
+    .menu-btn.active {
+      background: var(--accent-muted);
+      color: #bfdbfe;
+      border-color: rgba(59,130,246,0.2);
+      font-weight: 500;
+    }
+
+    .menu-btn.active .btn-dot {
+      background: var(--accent-light);
+      box-shadow: 0 0 6px rgba(96,165,250,0.6);
+    }
+
+    .menu-btn.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 25%; bottom: 25%;
+      width: 2px;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+      background: white;
+    }
+
+    iframe.visible {
+      display: block;
+    }
+
+    /* ── WELCOME SCREEN ── */
+    .welcome {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: #f8fafc;
+    }
+
+    .welcome-card {
+      text-align: center;
+      max-width: 360px;
+      padding: 48px 40px;
+    }
+
+    .welcome-glyph {
+      width: 72px;
+      height: 72px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      margin: 0 auto 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    .welcome-glyph svg {
+      width: 32px;
+      height: 32px;
+      stroke: #3b82f6;
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .welcome-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      color: #3b82f6;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .welcome-title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 300;
+      color: #0f172a;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .welcome-desc {
+      font-size: 14px;
+      font-weight: 400;
+      color: #64748b;
+      line-height: 1.7;
+    }
+
+    .welcome-hint {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 32px;
+      padding: 12px 18px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 12.5px;
+      color: #94a3b8;
+    }
+
+    .welcome-hint-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #3b82f6;
+      flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .welcome-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 24px;
+      width: 100%;
+    }
+
+    .welcome-chip {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M9 12h6M12 9v6M12 21a9 9 0 100-18 9 9 0 000 18z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">Historias Clínicas</div>
+      <div class="header-subtitle">Plataforma de gestión médica</div>
+    </div>
+  </div>
+  <div class="header-badge">Proyecto Final · Patrones de Diseño</div>
+</header>
+
+<div class="container">
+
+  <!-- MENÚ -->
+  <div class="menu">
+    <div class="menu-inner">
+
+      <div class="menu-section-label">Creacionales</div>
+      <button class="menu-btn" onclick="loadPage('singleton.html', this)">
+        <span class="btn-dot"></span> Singleton
+      </button>
+      <button class="menu-btn" onclick="loadPage('factory.html', this)">
+        <span class="btn-dot"></span> Factory Method
+      </button>
+      <button class="menu-btn" onclick="loadPage('abstract-factory.html', this)">
+        <span class="btn-dot"></span> Abstract Factory
+      </button>
+      <button class="menu-btn" onclick="loadPage('builder.html', this)">
+        <span class="btn-dot"></span> Builder
+      </button>
+      <button class="menu-btn" onclick="loadPage('prototype.html', this)">
+        <span class="btn-dot"></span> Prototype
+      </button>
+
+      <div class="menu-section-label">Estructurales</div>
+      <button class="menu-btn" onclick="loadPage('adapter.html', this)">
+        <span class="btn-dot"></span> Adapter
+      </button>
+      <button class="menu-btn" onclick="loadPage('bridge.html', this)">
+        <span class="btn-dot"></span> Bridge
+      </button>
+      <button class="menu-btn" onclick="loadPage('decorator.html', this)">
+        <span class="btn-dot"></span> Decorator
+      </button>
+      <button class="menu-btn" onclick="loadPage('composite.html', this)">
+        <span class="btn-dot"></span> Composite
+      </button>
+      <button class="menu-btn" onclick="loadPage('facade.html', this)">
+        <span class="btn-dot"></span> Facade
+      </button>
+      <button class="menu-btn" onclick="loadPage('flyweight.html', this)">
+        <span class="btn-dot"></span> Flyweight
+      </button>
+      <button class="menu-btn" onclick="loadPage('proxy.html', this)">
+        <span class="btn-dot"></span> Proxy
+      </button>
+
+    </div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="content">
+    <iframe id="viewer"></iframe>
+
+    <div id="welcome" class="welcome">
+      <div class="welcome-card">
+        <div class="welcome-glyph">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
+            <path d="M14 2v6h6M9 13h6M9 17h4"/>
+          </svg>
+        </div>
+        <div class="welcome-tag">Bienvenido</div>
+        <h2 class="welcome-title">Selecciona un patrón</h2>
+        <p class="welcome-desc">Elige un patrón de diseño del menú lateral para visualizar su implementación en la plataforma.</p>
+        <div class="welcome-hint">
+          <span class="welcome-hint-dot"></span>
+          12 patrones disponibles listos para explorar
+        </div>
+        <div class="welcome-grid">
+          <div class="welcome-chip">Singleton</div>
+          <div class="welcome-chip">Factory</div>
+          <div class="welcome-chip">Builder</div>
+          <div class="welcome-chip">Adapter</div>
+          <div class="welcome-chip">Bridge</div>
+          <div class="welcome-chip">Proxy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function loadPage(page, btn) {
+    const viewer = document.getElementById("viewer");
+    const welcome = document.getElementById("welcome");
+
+    viewer.src = page;
+    viewer.classList.add("visible");
+    welcome.style.display = "none";
+
+    document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+  }
+</script>
+
+</body>
+</html>

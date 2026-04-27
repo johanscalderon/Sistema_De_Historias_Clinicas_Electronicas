@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo Singleton</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Prueba del patrón Singleton</h1>
+    <p>
+      Esta pantalla envía una prescripción al backend para activar <b>AlertEngine</b>.
+      La prueba real del Singleton se ve en la consola del backend, donde el mensaje
+      <code>-----AlertEngine instanciado UNA SOLA VEZ------</code> debe aparecer solo una vez.
+    </p>
+
+    <div class="grid">
+      <div class="full">
+        <label for="patientId">UUID del paciente</label>
+        <input id="patientId" placeholder="ee7ee567-1885-4e78-80eb-642ed9ab23ad" />
+      </div>
+
+      <div>
+        <label for="medicationName">Medicamento</label>
+        <input id="medicationName" value="aspirin" />
+      </div>
+
+      <div>
+        <label for="medicationCode">Código medicamento</label>
+        <input id="medicationCode" value="SINGLETON-DEMO" />
+      </div>
+
+      <div>
+        <label for="dose">Dosis</label>
+        <input id="dose" value="100mg" />
+      </div>
+
+      <div>
+        <label for="frequency">Frecuencia</label>
+        <input id="frequency" value="daily" />
+      </div>
+
+      <div>
+        <label for="startDate">Fecha inicio</label>
+        <input id="startDate" type="date" value="2026-04-06" />
+      </div>
+
+      <div>
+        <label for="endDate">Fecha fin</label>
+        <input id="endDate" type="date" value="2026-04-20" />
+      </div>
+
+      <div class="full">
+        <label for="createdBy">Creado por</label>
+        <input id="createdBy" value="doctor1" />
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="primary" onclick="sendPrescription()">Enviar prescripción</button>
+      <button class="secondary" onclick="sendTwice()">Enviar dos veces</button>
+      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    </div>
+
+    <div class="note">
+      <b>Importante:</b> abre la consola del backend. Ahí verás que el <b>AlertEngine</b> se crea una sola vez,
+      aunque pulses varias veces este formulario.
+    </div>
+
+    <h3>Respuesta del backend</h3>
+    <pre id="output">Aún no se ha enviado nada.</pre>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/api/prescriptions";
+
+    function getPayload() {
+      return {
+        patient: {
+          id: document.getElementById("patientId").value.trim()
+        },
+        medicationName: document.getElementById("medicationName").value.trim(),
+        medicationCode: document.getElementById("medicationCode").value.trim(),
+        dose: document.getElementById("dose").value.trim(),
+        frequency: document.getElementById("frequency").value.trim(),
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        createdBy: document.getElementById("createdBy").value.trim()
+      };
+    }
+
+    async function sendPrescription() {
+      const output = document.getElementById("output");
+      output.textContent = "Enviando...";
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(getPayload())
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        output.textContent = "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+    async function sendTwice() {
+      await sendPrescription();
+      setTimeout(sendPrescription, 800);
+    }
+
+    function clearOutput() {
+      document.getElementById("output").textContent = "Aún no se ha enviado nada.";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acceso a Pacientes</title>
+  <style>
+    body { font-family: Arial; background: #f5f7fb; padding: 24px; }
+    .card {
+      max-width: 900px; margin: auto; background: white;
+      padding: 24px; border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    input, select {
+      width: 100%; padding: 10px;
+      border-radius: 10px; border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 12px; padding: 12px;
+      border: none; border-radius: 10px;
+      cursor: pointer; font-weight: bold;
+    }
+
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; }
+
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Acceso a Pacientes</h1>
+
+  <p>
+    Esta pantalla demuestra el patrón <b>Proxy</b>, donde se controla el acceso
+    a los datos del paciente según el rol del usuario.
+  </p>
+
+  <label>ID del paciente</label>
+  <input id="patientId" />
+
+  <label>Rol del usuario</label>
+  <select id="role">
+    <option value="DOCTOR">Doctor</option>
+    <option value="NURSE">Enfermero</option>
+    <option value="ADMIN">Administrador</option>
+    <option value="GUEST">Invitado</option>
+  </select>
+
+  <button class="primary" onclick="getPatient()">Consultar paciente</button>
+  <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+
+  <h3>Respuesta</h3>
+  <pre id="output">Sin ejecutar</pre>
+</div>
+
+<script>
+const API_URL = "http://localhost:8080/api/proxy/patients";
+
+function loadExample() {
+  document.getElementById("patientId").value =
+    "ee7ee567-1885-4e78-80eb-642ed9ab23ad";
+}
+
+async function getPatient() {
+  const output = document.getElementById("output");
+  output.textContent = "Consultando...";
+
+  const id = document.getElementById("patientId").value;
+  const role = document.getElementById("role").value;
+
+  try {
+    const res = await fetch(`${API_URL}/${id}?role=${role}`);
+    const text = await res.text();
+
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+
+    if (!res.ok) {
+      output.textContent = "Error: " + text;
+      return;
+    }
+
+    output.textContent = JSON.stringify(data, null, 2);
+
+  } catch (e) {
+    output.textContent = "Error: " + e.message;
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Alertas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Gestión de Alertas</h1>
+    <p>
+      Esta pantalla permite enviar una alerta usando el patrón <b>Bridge</b>.
+      El sistema separa el <b>tipo de alerta</b> del <b>canal de envío</b>, para que ambos puedan cambiar por separado.
+    </p>
+
+    <div class="grid">
+      <div>
+        <label for="alertType">Tipo de alerta</label>
+        <select id="alertType" onchange="loadExample()">
+          <option value="clinical">Clínica</option>
+          <option value="iot">IoT</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="channelType">Canal de envío</label>
+        <select id="channelType">
+          <option value="console">Consola</option>
+          <option value="email">Correo (simulado)</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label for="subject">Asunto</label>
+        <input id="subject" />
+      </div>
+
+      <div class="full">
+        <label for="message">Mensaje</label>
+        <textarea id="message"></textarea>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="primary" onclick="sendBridgeAlert()">Enviar alerta</button>
+      <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    </div>
+
+    <div class="note">
+      <b>Idea del Bridge:</b> el backend decide qué tipo de alerta crear y por qué canal enviarla sin mezclar ambas cosas en una sola clase.
+    </div>
+
+    <p class="small">
+      El canal de correo se muestra como simulación en consola para mantener la demo simple y funcional.
+    </p>
+
+    <h3>Respuesta del backend</h3>
+    <pre id="output">Aún no se ha enviado nada.</pre>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/api/bridge/alerts/send";
+
+    function loadExample() {
+      const type = document.getElementById("alertType").value;
+
+      if (type === "clinical") {
+        document.getElementById("subject").value = "ALERTA CLÍNICA";
+        document.getElementById("message").value = "Posible interacción con aspirina detectada en una prescripción.";
+      } else {
+        document.getElementById("subject").value = "ALERTA IOT";
+        document.getElementById("message").value = "Temperatura alta detectada desde un dispositivo IoT.";
+      }
+    }
+
+    async function sendBridgeAlert() {
+      const output = document.getElementById("output");
+      output.textContent = "Enviando...";
+
+      const payload = {
+        alertType: document.getElementById("alertType").value,
+        channelType: document.getElementById("channelType").value,
+        subject: document.getElementById("subject").value.trim(),
+        message: document.getElementById("message").value.trim()
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        output.textContent = "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById("output").textContent = "Aún no se ha enviado nada.";
+    }
+
+    loadExample();
+  </script>
+</body>
+</html>

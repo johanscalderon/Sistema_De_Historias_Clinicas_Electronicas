@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Builder - Prescripción</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Prueba del patrón Builder</h1>
+    <p>
+      Esta pantalla envía los datos de una prescripción al backend.
+      El backend busca al paciente y construye el objeto <b>Prescription</b> paso a paso usando
+      <b>PrescriptionBuilder</b>.
+    </p>
+
+    <div class="grid">
+      <div class="full">
+        <label for="patientId">UUID del paciente</label>
+        <input id="patientId" placeholder="ee7ee567-1885-4e78-80eb-642ed9ab23ad" />
+      </div>
+
+      <div>
+        <label for="medicationName">Medicamento</label>
+        <input id="medicationName" />
+      </div>
+
+      <div>
+        <label for="medicationCode">Código medicamento</label>
+        <input id="medicationCode" />
+      </div>
+
+      <div>
+        <label for="dose">Dosis</label>
+        <input id="dose" />
+      </div>
+
+      <div>
+        <label for="frequency">Frecuencia</label>
+        <input id="frequency" />
+      </div>
+
+      <div>
+        <label for="startDate">Fecha inicio</label>
+        <input id="startDate" type="date" />
+      </div>
+
+      <div>
+        <label for="endDate">Fecha fin</label>
+        <input id="endDate" type="date" />
+      </div>
+
+      <div class="full">
+        <label for="createdBy">Creado por</label>
+        <input id="createdBy" />
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="primary" onclick="sendBuilderRequest()">Enviar prescripción</button>
+      <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    </div>
+
+    <div class="note">
+      <b>Idea de la prueba:</b> el Builder permite construir la prescripción paso a paso,
+      sin usar un constructor largo ni llenar el código de <code>set()</code>.
+    </div>
+
+    <p class="small">
+      Si el backend responde correctamente, verás la prescripción creada y podrás confirmar que
+      el patrón Builder está funcionando.
+    </p>
+
+    <h3>Respuesta del backend</h3>
+    <pre id="output">Aún no se ha enviado nada.</pre>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/api/builder/prescriptions";
+
+    function loadExample() {
+      document.getElementById("patientId").value = "ee7ee567-1885-4e78-80eb-642ed9ab23ad";
+      document.getElementById("medicationName").value = "Aspirin";
+      document.getElementById("medicationCode").value = "ASP-100";
+      document.getElementById("dose").value = "100mg";
+      document.getElementById("frequency").value = "daily";
+      document.getElementById("startDate").value = "2026-04-06";
+      document.getElementById("endDate").value = "2026-04-20";
+      document.getElementById("createdBy").value = "doctor1";
+    }
+
+    async function sendBuilderRequest() {
+      const output = document.getElementById("output");
+      output.textContent = "Enviando...";
+
+      const payload = {
+        patientId: document.getElementById("patientId").value.trim(),
+        medicationName: document.getElementById("medicationName").value.trim(),
+        medicationCode: document.getElementById("medicationCode").value.trim(),
+        dose: document.getElementById("dose").value.trim(),
+        frequency: document.getElementById("frequency").value.trim(),
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        createdBy: document.getElementById("createdBy").value.trim()
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        output.textContent = "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById("output").textContent = "Aún no se ha enviado nada.";
+    }
+
+    loadExample();
+  </script>
+</body>
+</html>

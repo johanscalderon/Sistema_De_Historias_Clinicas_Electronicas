@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Historia Clínica</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Historia Clínica</h1>
+
+    <p>
+      Esta pantalla muestra la estructura del patrón <b>Composite</b>.
+      La historia clínica completa es el objeto principal y dentro de ella se agrupan
+      diagnósticos y tratamientos como partes del mismo árbol.
+    </p>
+
+    <div class="grid">
+      <div class="full">
+        <label for="patientName">Nombre del paciente</label>
+        <input id="patientName" value="Carlos Calderon" />
+      </div>
+
+      <div class="full">
+        <label for="diagnosis">Diagnóstico</label>
+        <textarea id="diagnosis">Hipertensión arterial | Presión elevada detectada</textarea>
+      </div>
+
+      <div class="full">
+        <label for="treatment">Tratamiento</label>
+        <textarea id="treatment">Acetaminofén | 100mg cada 8 horas</textarea>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="primary" onclick="loadComposite()">Ver historia clínica</button>
+      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    </div>
+
+    <div class="note">
+      <b>Idea del Composite:</b> un elemento individual y un grupo de elementos se manejan de la misma forma.
+      Aquí la historia clínica completa contiene diagnósticos y tratamientos.
+    </div>
+
+    <p class="small">
+      El backend devuelve una historia clínica demo con su estructura jerárquica.
+    </p>
+
+    <h3>Respuesta del backend</h3>
+    <pre id="output">Aún no se ha cargado la historia clínica.</pre>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/api/composite/demo";
+
+    async function loadComposite() {
+      const output = document.getElementById("output");
+      output.textContent = "Cargando historia clínica...";
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "GET"
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+
+        output.textContent = typeof data === "string"
+          ? data
+          : JSON.stringify(data, null, 2);
+
+      } catch (error) {
+        output.textContent = "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById("output").textContent = "Aún no se ha cargado la historia clínica.";
+    }
+  </script>
+</body>
+</html>

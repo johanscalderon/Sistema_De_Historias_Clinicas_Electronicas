@@ -1,4 +1,4 @@
-package com.historiasclinias.plataforma.controller;
+package com.historiasclinias.plataforma.Controller;
 
 import com.historiasclinias.plataforma.adapter.*;
 import com.historiasclinias.plataforma.model.Observation;

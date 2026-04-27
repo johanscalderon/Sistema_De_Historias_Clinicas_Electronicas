@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abstract Factory - Alertas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Prueba del patrón Abstract Factory</h1>
+    <p>
+      Esta pantalla permite elegir qué familia de alertas usar:
+      <b>clinicalAlertFactory</b> o <b>iotAlertFactory</b>.
+      El backend crea la alerta y la notificación según la fábrica seleccionada.
+    </p>
+
+    <div class="grid">
+      <div class="full">
+        <label for="factoryBeanName">Familia de alertas</label>
+        <select id="factoryBeanName" onchange="loadExample()">
+          <option value="clinicalAlertFactory">clinicalAlertFactory</option>
+          <option value="iotAlertFactory">iotAlertFactory</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label for="patientId">UUID del paciente</label>
+        <input id="patientId" placeholder="ee7ee567-1885-4e78-80eb-642ed9ab23ad" />
+      </div>
+
+      <div>
+        <label for="medicationName">Medicamento</label>
+        <input id="medicationName" />
+      </div>
+
+      <div>
+        <label for="medicationCode">Código medicamento</label>
+        <input id="medicationCode" />
+      </div>
+
+      <div>
+        <label for="dose">Dosis</label>
+        <input id="dose" />
+      </div>
+
+      <div>
+        <label for="frequency">Frecuencia</label>
+        <input id="frequency" />
+      </div>
+
+      <div>
+        <label for="startDate">Fecha inicio</label>
+        <input id="startDate" type="date" />
+      </div>
+
+      <div>
+        <label for="endDate">Fecha fin</label>
+        <input id="endDate" type="date" />
+      </div>
+
+      <div class="full">
+        <label for="createdBy">Creado por</label>
+        <input id="createdBy" />
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="primary" onclick="sendAbstractFactoryDemo()">Enviar prueba</button>
+      <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    </div>
+
+    <div class="note">
+      <b>Idea de la prueba:</b> al cambiar la fábrica, el backend crea un tipo distinto de alerta.
+      Así se demuestra que <code>AlertEngine</code> delega la creación y la notificación a la fábrica correcta.
+    </div>
+
+    <p class="small">
+      Para la familia clínica puedes usar <code>aspirin</code>. Para la familia IoT usa <code>sensor-xyz</code>,
+      porque así lo tienes configurado en tu backend.
+    </p>
+
+    <h3>Respuesta del backend</h3>
+    <pre id="output">Aún no se ha enviado nada.</pre>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/api/abstract-factory/demo";
+
+    function setValue(id, value) {
+      document.getElementById(id).value = value;
+    }
+
+    function loadExample() {
+      const factory = document.getElementById("factoryBeanName").value;
+
+      setValue("patientId", "ee7ee567-1885-4e78-80eb-642ed9ab23ad");
+      setValue("startDate", "2026-04-06");
+      setValue("endDate", "2026-04-20");
+
+      if (factory === "clinicalAlertFactory") {
+        setValue("medicationName", "aspirin");
+        setValue("medicationCode", "CLIN-001");
+        setValue("dose", "100mg");
+        setValue("frequency", "daily");
+        setValue("createdBy", "doctor1");
+      } else {
+        setValue("medicationName", "sensor-xyz");
+        setValue("medicationCode", "IOT-001");
+        setValue("dose", "1 unit");
+        setValue("frequency", "continuous");
+        setValue("createdBy", "iot-system");
+      }
+    }
+
+    async function sendAbstractFactoryDemo() {
+      const output = document.getElementById("output");
+      output.textContent = "Enviando...";
+
+      const factoryBeanName = document.getElementById("factoryBeanName").value;
+
+      const payload = {
+        patientId: document.getElementById("patientId").value.trim(),
+        medicationName: document.getElementById("medicationName").value.trim(),
+        medicationCode: document.getElementById("medicationCode").value.trim(),
+        dose: document.getElementById("dose").value.trim(),
+        frequency: document.getElementById("frequency").value.trim(),
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        createdBy: document.getElementById("createdBy").value.trim()
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/${factoryBeanName}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        output.textContent = "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById("output").textContent = "Aún no se ha enviado nada.";
+    }
+
+    loadExample();
+  </script>
+</body>
+</html>
