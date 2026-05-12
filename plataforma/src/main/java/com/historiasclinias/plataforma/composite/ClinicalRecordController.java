@@ -1,23 +1,34 @@
-package com.historiasclinias.plataforma.controller;
+package com.historiasclinias.plataforma.composite;
 
-import com.historiasclinias.plataforma.composite.ClinicalRecord;
-import com.historiasclinias.plataforma.composite.ClinicalRecordService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
-@RequestMapping("/api/composite")
+@RequestMapping("/api/composite/histories")
+@CrossOrigin("*")
 public class ClinicalRecordController {
 
-    private final ClinicalRecordService service;
+    private final ClinicalRecordService clinicalRecordService;
 
-    public ClinicalRecordController(ClinicalRecordService service) {
-        this.service = service;
+    public ClinicalRecordController(ClinicalRecordService clinicalRecordService) {
+        this.clinicalRecordService = clinicalRecordService;
     }
 
-    @GetMapping("/demo")
-    public ResponseEntity<String> demo() {
-        ClinicalRecord record = service.buildDemoRecord();
-        return ResponseEntity.ok(record.showDetails());
+    @PostMapping
+    public ResponseEntity<ClinicalRecord> create(@RequestBody ClinicalHistoryRequest request) {
+        return ResponseEntity.ok(clinicalRecordService.createHistory(request));
+    }
+
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<ClinicalRecord>> byPatient(@PathVariable UUID patientId) {
+        return ResponseEntity.ok(clinicalRecordService.findByPatientId(patientId));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ClinicalRecord>> all() {
+        return ResponseEntity.ok(clinicalRecordService.findAll());
     }
 }

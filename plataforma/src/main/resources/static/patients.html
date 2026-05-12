@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Pacientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 1100px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: #eff6ff;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Gestión de Pacientes</h1>
+    <p>
+      Esta pantalla permite crear pacientes y consultar los que ya existen en el sistema.
+      Los datos se envían al backend y luego se muestran en una tabla.
+    </p>
+
+    <div class="grid">
+      <div>
+        <label for="firstName">Nombre</label>
+        <input id="firstName" placeholder="Carlos" />
+      </div>
+
+      <div>
+        <label for="lastName">Apellido</label>
+        <input id="lastName" placeholder="Calderón" />
+      </div>
+
+      <div>
+        <label for="dni">DNI</label>
+        <input id="dni" placeholder="12345678" />
+      </div>
+
+      <div>
+        <label for="birthDate">Fecha de nacimiento</label>
+        <input id="birthDate" type="date" />
+      </div>
+
+      <div class="full">
+        <label for="gender">Género</label>
+        <select id="gender">
+          <option value="">Seleccione</option>
+          <option value="M">Masculino</option>
+          <option value="F">Femenino</option>
+          <option value="O">Otro</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="primary" onclick="createPatient()">Crear paciente</button>
+      <button class="secondary" onclick="loadPatients()">Ver pacientes</button>
+      <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    </div>
+
+    <div class="note">
+      <b>Campos del modelo Patient:</b> id, firstName, lastName, dni, birthDate y gender.
+      El id se genera automáticamente en el backend.
+    </div>
+
+    <p class="small">
+      Esta pantalla muestra los pacientes ya creados en una tabla, para que puedas evidenciar el registro y la consulta.
+    </p>
+
+    <h3>Respuesta del backend</h3>
+    <pre id="output">Aún no se ha ejecutado nada.</pre>
+
+    <h3>Pacientes registrados</h3>
+    <div id="patientsContainer">
+      <p class="small">Presiona "Ver pacientes" para cargar los registros.</p>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/api/patients";
+
+    function loadExample() {
+      document.getElementById("firstName").value = "Carlos";
+      document.getElementById("lastName").value = "Calderón";
+      document.getElementById("dni").value = "10035574";
+      document.getElementById("birthDate").value = "2000-07-02";
+      document.getElementById("gender").value = "M";
+    }
+
+    async function createPatient() {
+      const output = document.getElementById("output");
+      output.textContent = "Enviando...";
+      
+      const payload = {
+        firstName: document.getElementById("firstName").value.trim(),
+        lastName: document.getElementById("lastName").value.trim(),
+        dni: document.getElementById("dni").value.trim(),
+        birthDate: document.getElementById("birthDate").value,
+        gender: document.getElementById("gender").value
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+          return;
+        }
+
+        output.textContent = JSON.stringify(data, null, 2);
+        await loadPatients();
+      } catch (error) {
+        output.textContent = "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+    async function loadPatients() {
+      const container = document.getElementById("patientsContainer");
+      container.innerHTML = "<p class='small'>Cargando pacientes...</p>";
+
+      try {
+        const res = await fetch(API_URL);
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
+        if (!res.ok) {
+          container.innerHTML = "<pre>Error HTTP " + res.status + "\n\n" + text + "</pre>";
+          return;
+        }
+
+        if (!Array.isArray(data) || data.length === 0) {
+          container.innerHTML = "<p class='small'>No hay pacientes registrados.</p>";
+          return;
+        }
+
+        let rows = data.map(p => `
+          <tr>
+            <td>${p.id ?? ""}</td>
+            <td>${p.firstName ?? ""}</td>
+            <td>${p.lastName ?? ""}</td>
+            <td>${p.dni ?? ""}</td>
+            <td>${p.birthDate ?? ""}</td>
+            <td>${p.gender ?? ""}</td>
+          </tr>
+        `).join("");
+
+        container.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>DNI</th>
+                <th>Fecha de nacimiento</th>
+                <th>Género</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        `;
+      } catch (error) {
+        container.innerHTML = "<p style='color:red;'>Error al cargar pacientes: " + error.message + "</p>";
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById("output").textContent = "Aún no se ha ejecutado nada.";
+      document.getElementById("patientsContainer").innerHTML =
+        "<p class='small'>Presiona \"Ver pacientes\" para cargar los registros.</p>";
+    }
+
+    loadExample();
+    loadPatients();
+  </script>
+</body>
+</html>

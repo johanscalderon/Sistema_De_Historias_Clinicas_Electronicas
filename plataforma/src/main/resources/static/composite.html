@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Historia Clínica</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,28 +13,40 @@
       padding: 24px;
       color: #1f2937;
     }
+
     .card {
-      max-width: 900px;
+      max-width: 1000px;
       margin: auto;
       background: white;
       border-radius: 16px;
       padding: 24px;
       box-shadow: 0 8px 24px rgba(0,0,0,.08);
     }
-    h1 { margin-top: 0; }
+
+    h1 {
+      margin-top: 0;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    .full { grid-column: 1 / -1; }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
     label {
       display: block;
       font-size: 14px;
       margin-bottom: 6px;
       font-weight: bold;
     }
-    input, textarea {
+
+    input,
+    textarea,
+    select {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #d1d5db;
@@ -42,10 +55,12 @@
       font-size: 14px;
       font-family: inherit;
     }
+
     textarea {
       min-height: 110px;
       resize: vertical;
     }
+
     button {
       border: none;
       padding: 12px 16px;
@@ -55,15 +70,26 @@
       margin-right: 8px;
       margin-top: 8px;
     }
-    .primary { background: #2563eb; color: white; }
-    .secondary { background: #e5e7eb; color: #111827; }
+
+    .primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
     pre {
       background: #0f172a;
       color: #e2e8f0;
       padding: 16px;
       border-radius: 12px;
       overflow: auto;
+      white-space: pre-wrap;
     }
+
     .note {
       background: #eff6ff;
       border: 1px solid #bfdbfe;
@@ -71,94 +97,387 @@
       border-radius: 12px;
       margin-top: 16px;
     }
+
     .small {
       font-size: 13px;
       color: #6b7280;
     }
+
+    .history-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 14px;
+      background: #fafafa;
+    }
+
+    .history-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #111827;
+    }
   </style>
 </head>
+
 <body>
+
   <div class="card">
+
     <h1>Historia Clínica</h1>
 
     <p>
-      Esta pantalla muestra la estructura del patrón <b>Composite</b>.
-      La historia clínica completa es el objeto principal y dentro de ella se agrupan
-      diagnósticos y tratamientos como partes del mismo árbol.
+      Esta pantalla permite crear y visualizar historias clínicas utilizando
+      el patrón <b>Composite</b>.
+      La historia clínica funciona como un objeto principal que agrupa
+      diagnósticos y tratamientos dentro de una misma estructura.
     </p>
 
     <div class="grid">
+
+      <div class="full">
+        <label for="patientSelect">Paciente</label>
+
+        <select id="patientSelect" onchange="loadPatientName()">
+          <option value="">Cargando pacientes...</option>
+        </select>
+      </div>
+
       <div class="full">
         <label for="patientName">Nombre del paciente</label>
-        <input id="patientName" value="Carlos Calderon" />
+        <input id="patientName" readonly />
       </div>
 
       <div class="full">
-        <label for="diagnosis">Diagnóstico</label>
-        <textarea id="diagnosis">Hipertensión arterial | Presión elevada detectada</textarea>
+        <label for="diagnoses">Diagnósticos</label>
+
+        <textarea id="diagnoses"
+          placeholder="Hipertensión | Presión elevada detectada
+Diabetes | Niveles altos de glucosa"></textarea>
       </div>
 
       <div class="full">
-        <label for="treatment">Tratamiento</label>
-        <textarea id="treatment">Acetaminofén | 100mg cada 8 horas</textarea>
+        <label for="treatments">Tratamientos</label>
+
+        <textarea id="treatments"
+          placeholder="Acetaminofén | 100mg cada 8 horas
+Insulina | 10 unidades antes del almuerzo"></textarea>
       </div>
+
     </div>
 
-    <div style="margin-top: 16px;">
-      <button class="primary" onclick="loadComposite()">Ver historia clínica</button>
-      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    <div style="margin-top:16px;">
+
+      <button class="primary" onclick="saveHistory()">
+        Guardar historia clínica
+      </button>
+
+      <button class="secondary" onclick="loadHistories()">
+        Ver historias del paciente
+      </button>
+
+      <button class="secondary" onclick="loadExample()">
+        Cargar ejemplo
+      </button>
+
+      <button class="secondary" onclick="clearOutput()">
+        Limpiar salida
+      </button>
+
     </div>
 
     <div class="note">
-      <b>Idea del Composite:</b> un elemento individual y un grupo de elementos se manejan de la misma forma.
-      Aquí la historia clínica completa contiene diagnósticos y tratamientos.
+      <b>Idea del Composite:</b>
+      la historia clínica es el objeto principal y dentro de ella
+      se agrupan diagnósticos y tratamientos como partes del mismo árbol.
     </div>
 
     <p class="small">
-      El backend devuelve una historia clínica demo con su estructura jerárquica.
+      El frontend consume endpoints REST del backend Spring Boot.
     </p>
 
     <h3>Respuesta del backend</h3>
-    <pre id="output">Aún no se ha cargado la historia clínica.</pre>
+
+    <pre id="output">
+Aún no se ha realizado ninguna operación.
+    </pre>
+
+    <h3>Historias clínicas registradas</h3>
+
+    <div id="historyContainer">
+      <p class="small">
+        Selecciona un paciente y presiona
+        “Ver historias del paciente”.
+      </p>
+    </div>
+
   </div>
 
   <script>
-    const API_URL = "http://localhost:8080/api/composite/demo";
 
-    async function loadComposite() {
-      const output = document.getElementById("output");
-      output.textContent = "Cargando historia clínica...";
+    // ===========================
+    // URLs DEL BACKEND
+    // ===========================
+
+    const API_PATIENTS_URL =
+      "http://localhost:8080/api/patients";
+
+    const API_HISTORIES_URL =
+      "http://localhost:8080/api/composite/histories";
+
+
+
+    // ===========================
+    // CARGAR PACIENTES
+    // ===========================
+
+    async function loadPatients() {
+
+      const select =
+        document.getElementById("patientSelect");
+
+      select.innerHTML =
+        "<option value=''>Cargando pacientes...</option>";
 
       try {
-        const res = await fetch(API_URL, {
-          method: "GET"
-        });
 
-        const text = await res.text();
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch {
-          data = text;
-        }
+        const response =
+          await fetch(API_PATIENTS_URL);
 
-        if (!res.ok) {
-          output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+        const patients =
+          await response.json();
+
+        if (!Array.isArray(patients) || patients.length === 0) {
+
+          select.innerHTML =
+            "<option value=''>No hay pacientes registrados</option>";
+
           return;
         }
 
-        output.textContent = typeof data === "string"
-          ? data
-          : JSON.stringify(data, null, 2);
+        select.innerHTML =
+          "<option value=''>Seleccione un paciente</option>";
+
+        patients.forEach(patient => {
+
+          const option =
+            document.createElement("option");
+
+          option.value = patient.id;
+
+          option.textContent =
+            `${patient.firstName} ${patient.lastName} - ${patient.dni}`;
+
+          option.dataset.name =
+            `${patient.firstName} ${patient.lastName}`;
+
+          select.appendChild(option);
+        });
 
       } catch (error) {
-        output.textContent = "Error al conectar con el backend:\n" + error.message;
+
+        select.innerHTML =
+          "<option value=''>Error al cargar pacientes</option>";
       }
     }
 
-    function clearOutput() {
-      document.getElementById("output").textContent = "Aún no se ha cargado la historia clínica.";
+
+
+    // ===========================
+    // MOSTRAR NOMBRE PACIENTE
+    // ===========================
+
+    function loadPatientName() {
+
+      const select =
+        document.getElementById("patientSelect");
+
+      const option =
+        select.options[select.selectedIndex];
+
+      document.getElementById("patientName").value =
+        option?.dataset?.name || "";
     }
+
+
+
+    // ===========================
+    // GUARDAR HISTORIA CLÍNICA
+    // ===========================
+
+    async function saveHistory() {
+
+      const output =
+        document.getElementById("output");
+
+      const patientId =
+        document.getElementById("patientSelect").value;
+
+      if (!patientId) {
+
+        output.textContent =
+          "Debes seleccionar un paciente.";
+
+        return;
+      }
+
+      const payload = {
+
+        patientId: patientId,
+
+        diagnoses:
+          document.getElementById("diagnoses").value,
+
+        treatments:
+          document.getElementById("treatments").value
+      };
+
+      try {
+
+        output.textContent =
+          "Guardando historia clínica...";
+
+        const response =
+          await fetch(API_HISTORIES_URL, {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(payload)
+          });
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+
+          output.textContent =
+            "Error HTTP " + response.status;
+
+          return;
+        }
+
+        output.textContent =
+          JSON.stringify(data, null, 2);
+
+        loadHistories();
+
+      } catch (error) {
+
+        output.textContent =
+          "Error al conectar con el backend:\n" + error.message;
+      }
+    }
+
+
+
+    // ===========================
+    // VER HISTORIAS DEL PACIENTE
+    // ===========================
+
+    async function loadHistories() {
+
+      const patientId =
+        document.getElementById("patientSelect").value;
+
+      const container =
+        document.getElementById("historyContainer");
+
+      if (!patientId) {
+
+        container.innerHTML =
+          "<p class='small'>Debes seleccionar un paciente.</p>";
+
+        return;
+      }
+
+      container.innerHTML =
+        "<p class='small'>Cargando historias clínicas...</p>";
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_HISTORIES_URL}/patient/${patientId}`
+          );
+
+        const histories =
+          await response.json();
+
+        if (!Array.isArray(histories) || histories.length === 0) {
+
+          container.innerHTML =
+            "<p class='small'>No hay historias clínicas registradas.</p>";
+
+          return;
+        }
+
+        container.innerHTML = "";
+
+        histories.forEach(history => {
+
+          container.innerHTML += `
+
+            <div class="history-card">
+
+              <div class="history-title">
+                ${history.patientName}
+              </div>
+
+              <pre>${history.details}</pre>
+
+            </div>
+          `;
+        });
+
+      } catch (error) {
+
+        container.innerHTML =
+          "<p style='color:red;'>Error al consultar historias clínicas.</p>";
+      }
+    }
+
+
+
+    // ===========================
+    // CARGAR DATOS DEMO
+    // ===========================
+
+    function loadExample() {
+
+      document.getElementById("diagnoses").value =
+        "Hipertensión | Presión elevada detectada";
+
+      document.getElementById("treatments").value =
+        "Acetaminofén | 100mg cada 8 horas";
+    }
+
+
+
+    // ===========================
+    // LIMPIAR
+    // ===========================
+
+    function clearOutput() {
+
+      document.getElementById("output").textContent =
+        "Aún no se ha realizado ninguna operación.";
+
+      document.getElementById("historyContainer").innerHTML =
+        "<p class='small'>Selecciona un paciente y presiona “Ver historias del paciente”.</p>";
+    }
+
+
+
+    // ===========================
+    // INICIO
+    // ===========================
+
+    loadPatients();
+
   </script>
+
 </body>
 </html>

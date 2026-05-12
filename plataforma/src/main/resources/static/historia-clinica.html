@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Historias Clínicas por Paciente</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .card {
+      max-width: 1100px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin-top: 0; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .full { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+      margin-top: 8px;
+    }
+
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #eff6ff;
+    }
+
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Historias Clínicas por Paciente</h1>
+    <p>
+      Esta pantalla permite seleccionar un paciente y visualizar sus historias clínicas.
+      Primero se cargan los pacientes registrados y luego se consulta la información clínica del seleccionado.
+    </p>
+
+    <div class="grid">
+      <div class="full">
+        <label for="patientSelect">Paciente</label>
+        <select id="patientSelect">
+          <option value="">Cargando pacientes...</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="primary" onclick="loadClinicalHistory()">Ver historia clínica</button>
+      <button class="secondary" onclick="loadPatients()">Recargar pacientes</button>
+      <button class="secondary" onclick="clearOutput()">Limpiar salida</button>
+    </div>
+
+    <div class="note">
+      <b>Idea:</b> seleccionas un paciente y el sistema muestra la historia clínica asociada.
+      Esto te sirve para evidenciar el uso del módulo Composite dentro del sistema.
+    </div>
+
+    <p class="small">
+      Si tu backend usa otra ruta para consultar historias clínicas, cambia la constante <code>API_HISTORY_URL</code>.
+    </p>
+
+    <h3>Resultado</h3>
+    <pre id="output">Aún no se ha cargado ninguna historia clínica.</pre>
+
+    <h3>Historias clínicas</h3>
+    <div id="historyContainer">
+      <p class="small">Selecciona un paciente y presiona “Ver historia clínica”.</p>
+    </div>
+  </div>
+
+  <script>
+  const API_PATIENTS_URL = "http://localhost:8080/api/patients";
+  const API_HISTORY_URL = "http://localhost:8080/api/composite/histories/patient";
+
+  async function loadPatients() {
+    const select = document.getElementById("patientSelect");
+    select.innerHTML = "<option value=''>Cargando pacientes...</option>";
+
+    try {
+      const response = await fetch(API_PATIENTS_URL);
+
+      if (!response.ok) {
+        select.innerHTML = "<option value=''>Error al cargar pacientes</option>";
+        return;
+      }
+
+      const patients = await response.json();
+
+      if (!Array.isArray(patients) || patients.length === 0) {
+        select.innerHTML = "<option value=''>No hay pacientes registrados</option>";
+        return;
+      }
+
+      select.innerHTML = "<option value=''>Seleccione un paciente</option>";
+
+      patients.forEach(patient => {
+        const option = document.createElement("option");
+        option.value = patient.id;
+        option.textContent = `${patient.firstName || ""} ${patient.lastName || ""} - ${patient.dni || ""}`;
+        select.appendChild(option);
+      });
+
+    } catch (error) {
+      select.innerHTML = "<option value=''>Error al cargar pacientes</option>";
+    }
+  }
+
+  async function loadClinicalHistory() {
+    const patientId = document.getElementById("patientSelect").value;
+    const output = document.getElementById("output");
+    const container = document.getElementById("historyContainer");
+
+    if (!patientId) {
+      output.textContent = "Debes seleccionar un paciente.";
+      return;
+    }
+
+    output.textContent = "Consultando historia clínica...";
+    container.innerHTML = "<p class='small'>Cargando información...</p>";
+
+    try {
+      const res = await fetch(`${API_HISTORY_URL}/${patientId}`);
+      const text = await res.text();
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = text;
+      }
+
+      if (!res.ok) {
+        output.textContent = "Error HTTP " + res.status + "\n\n" + text;
+        container.innerHTML = "<p style='color:red;'>Error al consultar la historia clínica.</p>";
+        return;
+      }
+
+      if (!Array.isArray(data) || data.length === 0) {
+        container.innerHTML = "<p class='small'>No hay historias clínicas registradas.</p>";
+        output.textContent = "No hay historias clínicas registradas.";
+        return;
+      }
+
+      container.innerHTML = data.map(item => `
+        <div class="history-card">
+          <div class="history-title">${item.patientName || ""} - ${item.createdAt || ""}</div>
+          <pre>${item.details || JSON.stringify(item, null, 2)}</pre>
+        </div>
+      `).join("");
+
+      output.textContent = JSON.stringify(data, null, 2);
+
+    } catch (error) {
+      output.textContent = "Error al conectar con el backend:\n" + error.message;
+      container.innerHTML = "<p style='color:red;'>Error al consultar la historia clínica.</p>";
+    }
+  }
+
+  function clearOutput() {
+    document.getElementById("output").textContent = "Aún no se ha cargado ninguna historia clínica.";
+    document.getElementById("historyContainer").innerHTML =
+      "<p class='small'>Selecciona un paciente y presiona “Ver historia clínica”.</p>";
+  }
+
+  // IMPORTANTE: cargar los pacientes al abrir la página
+  loadPatients();
+</script>
+</body>
+</html>
