@@ -30,13 +30,13 @@ public class ClinicalRecord implements ClinicalComponent {
     @Column(length = 4000)
     private String treatments;
 
+    @Column(name = "status")
+    private String status = "DRAFT";
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // ===== CONSTRUCTOR VACÍO =====
     public ClinicalRecord() {
     }
-
-    // ===== GETTERS Y SETTERS =====
 
     public UUID getId() {
         return id;
@@ -78,6 +78,14 @@ public class ClinicalRecord implements ClinicalComponent {
         this.treatments = treatments;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -88,11 +96,14 @@ public class ClinicalRecord implements ClinicalComponent {
 
     @Transient
     public String getDetails() {
-
         StringBuilder sb = new StringBuilder();
 
         sb.append("Historia clínica de: ")
           .append(patientName)
+          .append("\n\n");
+
+        sb.append("Estado: ")
+          .append(status)
           .append("\n\n");
 
         sb.append("Diagnósticos:\n")

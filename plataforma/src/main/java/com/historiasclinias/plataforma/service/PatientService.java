@@ -14,6 +14,20 @@ public class PatientService {
     public PatientService(PatientRepository repo) { this.repo = repo; }
 
     public Patient save(Patient p) { return repo.save(p); }
+
+    public Patient update(UUID id, Patient data) {
+        Patient patient = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        patient.setFirstName(data.getFirstName());
+        patient.setLastName(data.getLastName());
+        patient.setDni(data.getDni());
+        patient.setBirthDate(data.getBirthDate());
+        patient.setGender(data.getGender());
+
+        return repo.save(patient);
+    }
+
     public List<Patient> findAll() { return repo.findAll(); }
     public Patient findById(UUID id) { return repo.findById(id).orElse(null); }
 }

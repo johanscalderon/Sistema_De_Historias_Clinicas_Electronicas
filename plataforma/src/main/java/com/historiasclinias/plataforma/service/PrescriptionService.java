@@ -63,6 +63,30 @@ public class PrescriptionService {
         return repo.save(p);
     }
 
+    public Prescription updateFromFields(UUID prescriptionId,
+                                         Patient patient,
+                                         String medicationName,
+                                         String medicationCode,
+                                         String dose,
+                                         String frequency,
+                                         LocalDate startDate,
+                                         LocalDate endDate,
+                                         String createdBy) {
+        Prescription p = repo.findById(prescriptionId)
+                .orElseThrow(() -> new RuntimeException("Prescription not found"));
+
+        p.setPatient(patient);
+        p.setMedicationName(medicationName);
+        p.setMedicationCode(medicationCode);
+        p.setDose(dose);
+        p.setFrequency(frequency);
+        p.setStartDate(startDate);
+        p.setEndDate(endDate);
+        p.setCreatedBy(createdBy);
+
+        return repo.save(p);
+    }
+
     public Prescription clonePrescription(UUID prescriptionId) {
         Prescription original = repo.findById(prescriptionId)
                 .orElseThrow(() -> new RuntimeException("Prescription not found"));
@@ -94,6 +118,10 @@ public class PrescriptionService {
 
     public List<Prescription> findAll() {
         return repo.findAll();
+    }
+
+    public List<Prescription> findByPatientId(UUID patientId) {
+        return repo.findByPatient_IdOrderByStartDateDesc(patientId);
     }
 
     public Prescription findById(UUID id) {

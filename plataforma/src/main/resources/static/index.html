@@ -1,513 +1,1533 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Patrones de Diseño - Plataforma Clínica</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Historias Clinicas Electronicas</title>
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    :root {
+      --ink: #172033;
+      --muted: #64748b;
+      --soft: #f6f8fb;
+      --surface: #ffffff;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --sidebar: #07111f;
+      --sidebar-2: #0d1b2f;
+      --teal: #0f766e;
+      --teal-soft: #e6fffb;
+      --blue: #2563eb;
+      --indigo: #4f46e5;
+      --amber: #b45309;
+      --rose: #be123c;
+      --green: #047857;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+      --radius: 8px;
+      --sidebar-width: 278px;
     }
 
-    :root {
-      --navy-900: #050c1a;
-      --navy-800: #0a1628;
-      --navy-700: #0f1f38;
-      --navy-600: #152847;
-      --accent: #3b82f6;
-      --accent-light: #60a5fa;
-      --accent-muted: rgba(59, 130, 246, 0.18);
-      --accent-glow: rgba(59, 130, 246, 0.08);
-      --text-muted: rgba(148, 163, 184, 0.7);
-      --text-secondary: #94a3b8;
-      --text-primary: #e2e8f0;
-      --border-subtle: rgba(148, 163, 184, 0.08);
-      --border-medium: rgba(148, 163, 184, 0.15);
-      --sidebar-width: 260px;
+    * {
+      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Outfit', sans-serif;
-      background: #f0f4f8;
-      height: 100vh;
+      margin: 0;
+      min-height: 100vh;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      background: var(--soft);
+      color: var(--ink);
+      font-family: Arial, sans-serif;
     }
 
-    /* ── HEADER ── */
-    header {
-      background: var(--navy-900);
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 28px;
-      flex-shrink: 0;
-      border-bottom: 1px solid var(--border-subtle);
-      position: relative;
-      overflow: hidden;
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
     }
 
-    header::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 60% 140% at 20% 50%, rgba(59,130,246,0.12) 0%, transparent 70%);
-      pointer-events: none;
+    button {
+      cursor: pointer;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      min-height: 100vh;
     }
 
-    .header-icon {
-      width: 36px;
-      height: 36px;
-      background: var(--accent-muted);
-      border: 1px solid rgba(59,130,246,0.3);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+    .sidebar {
+      background: linear-gradient(180deg, var(--sidebar), var(--sidebar-2));
+      color: #dbeafe;
+      overflow-y: auto;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .header-icon svg {
-      width: 18px;
-      height: 18px;
-      stroke: var(--accent-light);
-      fill: none;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+    .brand {
+      padding: 22px 18px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .header-title {
-      font-family: 'Fraunces', serif;
+    .brand-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      background: rgba(20, 184, 166, 0.16);
+      color: #5eead4;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: #f8fafc;
       font-size: 18px;
-      font-weight: 300;
-      color: #f1f5f9;
-      letter-spacing: 0.01em;
-      line-height: 1;
+      line-height: 1.25;
     }
 
-    .header-subtitle {
+    .brand p {
+      margin: 7px 0 0;
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .nav {
+      padding: 14px;
+    }
+
+    .nav-label {
+      margin: 16px 8px 8px;
+      color: #94a3b8;
       font-size: 11px;
-      font-weight: 400;
-      color: var(--text-muted);
+      font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-top: 3px;
     }
 
-    .header-badge {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      font-weight: 500;
-      color: var(--accent-light);
-      background: var(--accent-muted);
-      border: 1px solid rgba(59,130,246,0.25);
-      padding: 4px 10px;
-      border-radius: 20px;
-      letter-spacing: 0.04em;
-    }
-
-    /* ── LAYOUT ── */
-    .container {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    /* ── SIDEBAR ── */
-    .menu {
-      width: var(--sidebar-width);
-      background: var(--navy-800);
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-      border-right: 1px solid var(--border-subtle);
-    }
-
-    .menu::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent);
-    }
-
-    .menu-inner {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 14px 20px;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border-medium) transparent;
-    }
-
-    .menu-inner::-webkit-scrollbar {
-      width: 4px;
-    }
-    .menu-inner::-webkit-scrollbar-thumb {
-      background: var(--border-medium);
-      border-radius: 4px;
-    }
-
-    .menu-section-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 9.5px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      padding: 0 10px;
-      margin-bottom: 8px;
-      margin-top: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .menu-section-label:first-child {
-      margin-top: 4px;
-    }
-
-    .menu-section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border-subtle);
-    }
-
-    .menu-btn {
-      width: 100%;
-      padding: 9px 12px;
-      margin-bottom: 3px;
-      border: 1px solid transparent;
-      border-radius: 8px;
-      cursor: pointer;
-      background: transparent;
-      color: var(--text-secondary);
-      text-align: left;
-      font-family: 'Outfit', sans-serif;
-      font-size: 13px;
-      font-weight: 400;
+    .nav-btn {
       display: flex;
       align-items: center;
       gap: 10px;
-      transition: all 0.18s ease;
-      position: relative;
+      width: 100%;
+      margin-bottom: 4px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: #cbd5e1;
+      padding: 10px 11px;
+      text-align: left;
+      font-weight: 700;
     }
 
-    .menu-btn .btn-dot {
-      width: 6px;
-      height: 6px;
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: rgba(20, 184, 166, 0.14);
+      border-color: rgba(94, 234, 212, 0.22);
+      color: #f8fafc;
+    }
+
+    .nav-dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: var(--border-medium);
+      background: #475569;
+    }
+
+    .nav-btn.active .nav-dot {
+      background: #5eead4;
+      box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.14);
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .topbar {
       flex-shrink: 0;
-      transition: background 0.18s ease, transform 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
     }
 
-    .menu-btn:hover {
-      background: rgba(255,255,255,0.04);
-      color: var(--text-primary);
-      border-color: var(--border-subtle);
+    .topbar h2 {
+      margin: 0;
+      font-size: 22px;
     }
 
-    .menu-btn:hover .btn-dot {
-      background: var(--accent);
-      transform: scale(1.2);
+    .topbar p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
     }
 
-    .menu-btn.active {
-      background: var(--accent-muted);
-      color: #bfdbfe;
-      border-color: rgba(59,130,246,0.2);
-      font-weight: 500;
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      border: 1px solid #99f6e4;
+      background: var(--teal-soft);
+      color: #115e59;
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 800;
     }
 
-    .menu-btn.active .btn-dot {
-      background: var(--accent-light);
-      box-shadow: 0 0 6px rgba(96,165,250,0.6);
+    .status.offline {
+      border-color: #fecdd3;
+      background: #fff1f2;
+      color: var(--rose);
     }
 
-    .menu-btn.active::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 25%; bottom: 25%;
-      width: 2px;
-      background: var(--accent);
-      border-radius: 0 2px 2px 0;
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
     }
 
-    /* ── CONTENT ── */
     .content {
       flex: 1;
-      position: relative;
-      overflow: hidden;
-      background: #f8fafc;
+      overflow-y: auto;
+      padding: 22px 24px 36px;
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .section {
       display: none;
-      background: white;
     }
 
-    iframe.visible {
+    .section.active {
       display: block;
     }
 
-    /* ── WELCOME SCREEN ── */
-    .welcome {
-      position: absolute;
-      inset: 0;
+    .section-head {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .section h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .section-desc {
+      max-width: 760px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two {
+      grid-template-columns: minmax(360px, 0.9fr) minmax(500px, 1.1fr);
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+    }
+
+    .grid.four {
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 16px 18px;
       background: #f8fafc;
+      border-bottom: 1px solid var(--line);
     }
 
-    .welcome-card {
-      text-align: center;
-      max-width: 360px;
-      padding: 48px 40px;
+    .card-head h4 {
+      margin: 0;
+      font-size: 16px;
     }
 
-    .welcome-glyph {
-      width: 72px;
-      height: 72px;
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 20px;
-      margin: 0 auto 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    .card-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
     }
 
-    .welcome-glyph svg {
-      width: 32px;
-      height: 32px;
-      stroke: #3b82f6;
-      fill: none;
-      stroke-width: 1.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+    .card-body {
+      padding: 18px;
     }
 
-    .welcome-tag {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      font-weight: 500;
-      color: #3b82f6;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      padding: 4px 12px;
-      border-radius: 20px;
+    .stat {
+      padding: 17px;
+    }
+
+    .stat-label {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      display: inline-block;
-      margin-bottom: 20px;
     }
 
-    .welcome-title {
-      font-family: 'Fraunces', serif;
-      font-size: 28px;
-      font-weight: 300;
-      color: #0f172a;
-      line-height: 1.2;
-      margin-bottom: 12px;
-      letter-spacing: -0.01em;
+    .stat-value {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 900;
     }
 
-    .welcome-desc {
-      font-size: 14px;
-      font-weight: 400;
-      color: #64748b;
-      line-height: 1.7;
+    .stat-note {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 13px;
     }
 
-    .welcome-hint {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 32px;
-      padding: 12px 18px;
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 12.5px;
-      color: #94a3b8;
-    }
-
-    .welcome-hint-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #3b82f6;
-      flex-shrink: 0;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-
-    .welcome-grid {
+    .form-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 24px;
-      width: 100%;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
-    .welcome-chip {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 11px;
-      color: #64748b;
-      text-align: center;
-      font-family: 'DM Mono', monospace;
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 11px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-weight: 900;
+    }
+
+    .btn-primary {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+      color: #3730a3;
+    }
+
+    .btn-neutral {
+      background: #f8fafc;
+      border-color: var(--line);
+      color: #334155;
+    }
+
+    .btn-danger {
+      background: #fff1f2;
+      border-color: #fecdd3;
+      color: var(--rose);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .mini-btn {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #334155;
+      padding: 7px 9px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .mini-btn.primary {
+      border-color: #99f6e4;
+      background: #f0fdfa;
+      color: #115e59;
+    }
+
+    .mini-btn.warn {
+      border-color: #fed7aa;
+      background: #fff7ed;
+      color: #9a3412;
+    }
+
+    .selected {
+      border: 1px solid #fed7aa;
+      border-radius: var(--radius);
+      background: #fff7ed;
+      color: #7c2d12;
+      padding: 12px;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    .selected strong {
+      color: #431407;
+    }
+
+    .message {
+      display: none;
+      margin-top: 14px;
+      border-radius: var(--radius);
+      padding: 11px 12px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.ok {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .message.warn {
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+    }
+
+    .message.error {
+      background: #fff1f2;
+      color: var(--rose);
+      border: 1px solid #fecdd3;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline-item {
+      border-left: 3px solid var(--indigo);
+      background: #f8fafc;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 11px 13px;
+    }
+
+    .timeline-title {
+      margin: 0 0 6px;
+      font-weight: 900;
+    }
+
+    .timeline-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      color: #334155;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1180px) {
+      .grid.two,
+      .grid.four {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        max-height: none;
+      }
+
+      .main {
+        height: auto;
+        overflow: visible;
+      }
+
+      .content {
+        overflow: visible;
+      }
+
+      .grid.two,
+      .grid.three,
+      .grid.four,
+      .form-grid,
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar,
+      .section-head {
+        display: grid;
+      }
     }
   </style>
 </head>
-
 <body>
-
-<header>
-  <div class="header-left">
-    <div class="header-icon">
-      <svg viewBox="0 0 24 24">
-        <path d="M9 12h6M12 9v6M12 21a9 9 0 100-18 9 9 0 000 18z"/>
-      </svg>
-    </div>
-    <div>
-      <div class="header-title">Historias Clínicas</div>
-      <div class="header-subtitle">Plataforma de gestión médica</div>
-    </div>
-  </div>
-  <div class="header-badge">Proyecto Final · Patrones de Diseño</div>
-</header>
-
-<div class="container">
-
-  <!-- MENÚ -->
-  <div class="menu">
-    <div class="menu-inner">
-
-      <div class="menu-section-label">Pacientes</div>
-      <button class="menu-btn" onclick="loadPage('patients.html')">
-        <span class="btn-dot"></span>Gestión de Pacientes
-      </button>  
-      <button class="menu-btn" onclick="loadPage('historia-clinica.html')">
-        <span class="btn-dot"></span>Historia Clinica</button>
-      <div class="menu-section-label">Creacionales</div>
-      <button class="menu-btn" onclick="loadPage('singleton.html', this)">
-        <span class="btn-dot"></span> Singleton
-      </button>
-      <button class="menu-btn" onclick="loadPage('factory.html', this)">
-        <span class="btn-dot"></span> Factory Method
-      </button>
-      <button class="menu-btn" onclick="loadPage('abstract-factory.html', this)">
-        <span class="btn-dot"></span> Abstract Factory
-      </button>
-      <button class="menu-btn" onclick="loadPage('builder.html', this)">
-        <span class="btn-dot"></span> Builder
-      </button>
-      <button class="menu-btn" onclick="loadPage('prototype.html', this)">
-        <span class="btn-dot"></span> Prototype
-      </button>
-
-      <div class="menu-section-label">Estructurales</div>
-      <button class="menu-btn" onclick="loadPage('adapter.html', this)">
-        <span class="btn-dot"></span> Adapter
-      </button>
-      <button class="menu-btn" onclick="loadPage('bridge.html', this)">
-        <span class="btn-dot"></span> Bridge
-      </button>
-      <button class="menu-btn" onclick="loadPage('decorator.html', this)">
-        <span class="btn-dot"></span> Decorator
-      </button>
-      <button class="menu-btn" onclick="loadPage('composite.html', this)">
-        <span class="btn-dot"></span> Composite
-      </button>
-      <button class="menu-btn" onclick="loadPage('facade.html', this)">
-        <span class="btn-dot"></span> Facade
-      </button>
-      <button class="menu-btn" onclick="loadPage('flyweight.html', this)">
-        <span class="btn-dot"></span> Flyweight
-      </button>
-      <button class="menu-btn" onclick="loadPage('proxy.html', this)">
-        <span class="btn-dot"></span> Proxy
-      </button>
-
-    </div>
-  </div>
-
-  <!-- CONTENIDO -->
-  <div class="content">
-    <iframe id="viewer"></iframe>
-
-    <div id="welcome" class="welcome">
-      <div class="welcome-card">
-        <div class="welcome-glyph">
-          <svg viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
-            <path d="M14 2v6h6M9 13h6M9 17h4"/>
-          </svg>
-        </div>
-        <div class="welcome-tag">Bienvenido</div>
-        <h2 class="welcome-title">Selecciona un patrón</h2>
-        <p class="welcome-desc">Elige un patrón de diseño del menú lateral para visualizar su implementación en la plataforma.</p>
-        <div class="welcome-hint">
-          <span class="welcome-hint-dot"></span>
-          12 patrones disponibles listos para explorar
-        </div>
-        <div class="welcome-grid">
-          <div class="welcome-chip">Singleton</div>
-          <div class="welcome-chip">Factory</div>
-          <div class="welcome-chip">Builder</div>
-          <div class="welcome-chip">Adapter</div>
-          <div class="welcome-chip">Bridge</div>
-          <div class="welcome-chip">Proxy</div>
-        </div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">+</div>
+        <h1>Historias Clinicas Electronicas</h1>
+        <p>Dashboard unico para pacientes, historias, prescripciones, alertas y seguimiento clinico.</p>
       </div>
-    </div>
+
+      <nav class="nav" aria-label="Secciones del dashboard">
+        <div class="nav-label">General</div>
+        <button class="nav-btn active" data-section="summary"><span class="nav-dot"></span>Resumen general</button>
+
+        <div class="nav-label">Pacientes</div>
+        <button class="nav-btn" data-section="patient-management"><span class="nav-dot"></span>Registro y gestion</button>
+        <button class="nav-btn" data-section="patient-search"><span class="nav-dot"></span>Consulta de pacientes</button>
+
+        <div class="nav-label">Historias clinicas</div>
+        <button class="nav-btn" data-section="history-create"><span class="nav-dot"></span>Crear historia clinica</button>
+        <button class="nav-btn" data-section="history-view"><span class="nav-dot"></span>Historias por paciente</button>
+
+        <div class="nav-label">Tratamientos</div>
+        <button class="nav-btn" data-section="prescriptions"><span class="nav-dot"></span>Prescripciones</button>
+
+        <div class="nav-label">Seguimiento</div>
+        <button class="nav-btn" data-section="alerts"><span class="nav-dot"></span>Alertas medicas</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Resumen general</h2>
+          <p id="pageSubtitle">Indicadores globales del sistema clinico.</p>
+        </div>
+        <div id="connectionStatus" class="status">
+          <span class="status-dot"></span>
+          <span>Conectando con backend</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <section id="summary" class="section active">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Objetivo 9</p>
+              <h3>Visualizacion del resumen general del sistema</h3>
+              <p class="section-desc">Indicadores globales y actividad reciente para apoyar la toma de decisiones clinicas.</p>
+            </div>
+            <button class="btn btn-secondary" id="refreshAll">Actualizar datos</button>
+          </div>
+
+          <div class="grid four">
+            <article class="card stat">
+              <p class="stat-label">Pacientes</p>
+              <p class="stat-value" id="statPatients">0</p>
+              <p class="stat-note">Registrados en el sistema</p>
+            </article>
+            <article class="card stat">
+              <p class="stat-label">Historias clinicas</p>
+              <p class="stat-value" id="statHistories">0</p>
+              <p class="stat-note">Registros clinicos creados</p>
+            </article>
+            <article class="card stat">
+              <p class="stat-label">Prescripciones</p>
+              <p class="stat-value" id="statPrescriptions">0</p>
+              <p class="stat-note">Tratamientos asignados</p>
+            </article>
+            <article class="card stat">
+              <p class="stat-label">Alertas</p>
+              <p class="stat-value" id="statAlerts">0</p>
+              <p class="stat-note">Interacciones detectadas</p>
+            </article>
+          </div>
+
+          <div class="grid two" style="margin-top:16px;">
+            <article class="card">
+              <div class="card-head">
+                <h4>Pacientes recientes</h4>
+                <p>Acceso rapido a los registros basicos.</p>
+              </div>
+              <div class="card-body">
+                <div id="summaryPatients" class="timeline"></div>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-head">
+                <h4>Historias clinicas recientes</h4>
+                <p>Ultimos registros de diagnosticos y tratamientos.</p>
+              </div>
+              <div class="card-body">
+                <div id="summaryHistories" class="timeline"></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="patient-management" class="section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Objetivo 1</p>
+              <h3>Registro y gestion de pacientes</h3>
+              <p class="section-desc">Crea, visualiza y actualiza los datos basicos de cada paciente desde el mismo dashboard.</p>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <article class="card">
+              <div class="card-head">
+                <h4 id="patientFormTitle">Registrar paciente</h4>
+                <p>Los datos se guardan en el backend Spring Boot.</p>
+              </div>
+              <div class="card-body">
+                <form id="patientForm">
+                  <div class="form-grid">
+                    <div>
+                      <label for="patientFirstName">Nombre</label>
+                      <input id="patientFirstName" required autocomplete="off" />
+                    </div>
+                    <div>
+                      <label for="patientLastName">Apellido</label>
+                      <input id="patientLastName" required autocomplete="off" />
+                    </div>
+                    <div>
+                      <label for="patientDni">Documento</label>
+                      <input id="patientDni" required autocomplete="off" />
+                    </div>
+                    <div>
+                      <label for="patientBirthDate">Fecha de nacimiento</label>
+                      <input id="patientBirthDate" type="date" />
+                    </div>
+                    <div class="full">
+                      <label for="patientGender">Genero</label>
+                      <select id="patientGender" required>
+                        <option value="">Seleccione</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                        <option value="O">Otro</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn btn-primary" type="submit" id="savePatientBtn">Registrar paciente</button>
+                    <button class="btn btn-neutral" type="button" id="resetPatientForm">Limpiar</button>
+                  </div>
+                  <div id="patientMessage" class="message"></div>
+                </form>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h4>Pacientes registrados</h4>
+                <p>Selecciona un paciente para usarlo en historias y prescripciones.</p>
+              </div>
+              <div class="card-body">
+                <div class="toolbar">
+                  <input id="managementSearch" placeholder="Buscar por nombre o documento" autocomplete="off" />
+                  <button class="btn btn-secondary" type="button" id="refreshPatients">Actualizar</button>
+                </div>
+                <div id="managementPatientsTable" class="table-wrap"></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="patient-search" class="section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Objetivo 2</p>
+              <h3>Consulta de pacientes registrados</h3>
+              <p class="section-desc">Lista y busca pacientes para acceder rapidamente a su informacion clinica.</p>
+            </div>
+          </div>
+
+          <article class="card">
+            <div class="card-head">
+              <h4>Busqueda de pacientes</h4>
+              <p>Desde aqui puedes seleccionar el paciente activo para las demas secciones.</p>
+            </div>
+            <div class="card-body">
+              <div class="toolbar">
+                <input id="consultSearch" placeholder="Buscar paciente..." autocomplete="off" />
+                <button class="btn btn-secondary" type="button" data-go-section="history-view">Ver historias</button>
+              </div>
+              <div id="consultPatientsTable" class="table-wrap"></div>
+            </div>
+          </article>
+        </section>
+
+        <section id="history-create" class="section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Objetivos 3, 4 y 5</p>
+              <h3>Creacion de historias clinicas</h3>
+              <p class="section-desc">Construye una historia clinica para un paciente a partir de diagnostico y tratamientos mediante prescripciones.</p>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <article class="card">
+              <div class="card-head">
+                <h4>Nueva historia clinica</h4>
+                <p>El tratamiento se registra primero como prescripcion y luego queda asociado a la historia.</p>
+              </div>
+              <div class="card-body">
+                <div id="activePatientBox" class="selected">No hay paciente activo seleccionado.</div>
+                <form id="historyForm">
+                  <div class="form-grid">
+                    <div class="full">
+                      <label for="historyPatient">Paciente</label>
+                      <select id="historyPatient" required></select>
+                    </div>
+                    <div>
+                      <label for="diagnosisName">Diagnostico clinico</label>
+                      <input id="diagnosisName" required placeholder="Ej. Hipertension arterial" />
+                    </div>
+                    <div>
+                      <label for="diagnosisPriority">Prioridad</label>
+                      <select id="diagnosisPriority">
+                        <option value="Control">Control</option>
+                        <option value="Seguimiento">Seguimiento</option>
+                        <option value="Prioritario">Prioritario</option>
+                      </select>
+                    </div>
+                    <div class="full">
+                      <label for="diagnosisDetail">Detalle del diagnostico</label>
+                      <textarea id="diagnosisDetail" required></textarea>
+                    </div>
+                    <div>
+                      <label for="historyMedicationName">Tratamiento / medicamento</label>
+                      <input id="historyMedicationName" required />
+                    </div>
+                    <div>
+                      <label for="historyMedicationCode">Codigo</label>
+                      <input id="historyMedicationCode" required />
+                    </div>
+                    <div>
+                      <label for="historyDose">Dosis</label>
+                      <input id="historyDose" required />
+                    </div>
+                    <div>
+                      <label for="historyFrequency">Frecuencia</label>
+                      <input id="historyFrequency" required />
+                    </div>
+                    <div>
+                      <label for="historyStartDate">Inicio</label>
+                      <input id="historyStartDate" type="date" required />
+                    </div>
+                    <div>
+                      <label for="historyEndDate">Fin</label>
+                      <input id="historyEndDate" type="date" required />
+                    </div>
+                    <div class="full">
+                      <label for="historyCreatedBy">Profesional responsable</label>
+                      <input id="historyCreatedBy" required />
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn btn-primary" type="submit">Guardar historia clinica</button>
+                    <button class="btn btn-neutral" type="button" id="loadHistoryExample">Cargar ejemplo</button>
+                  </div>
+                  <div id="historyMessage" class="message"></div>
+                </form>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h4>Ultimas historias creadas</h4>
+                <p>Vista rapida de los registros clinicos recientes.</p>
+              </div>
+              <div class="card-body">
+                <div id="recentHistories" class="timeline"></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="history-view" class="section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Objetivo 6</p>
+              <h3>Visualizacion de historias clinicas por paciente</h3>
+              <p class="section-desc">Consulta todas las historias registradas segun el paciente seleccionado.</p>
+            </div>
+          </div>
+
+          <article class="card">
+            <div class="card-head">
+              <h4>Historias por paciente</h4>
+              <p>El listado se actualiza al cambiar el paciente activo.</p>
+            </div>
+            <div class="card-body">
+              <div class="toolbar">
+                <select id="historyViewPatient"></select>
+                <button class="btn btn-secondary" type="button" id="reloadHistories">Consultar</button>
+              </div>
+              <div id="patientHistories" class="timeline"></div>
+            </div>
+          </article>
+        </section>
+
+        <section id="prescriptions" class="section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Objetivos 7 y 8</p>
+              <h3>Registro, consulta y edicion de prescripciones</h3>
+              <p class="section-desc">Crea prescripciones por paciente, consulta sus tratamientos y actualiza prescripciones existentes.</p>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <article class="card">
+              <div class="card-head">
+                <h4 id="prescriptionFormTitle">Nueva prescripcion</h4>
+                <p>Las prescripciones funcionan como tratamientos dentro de la historia clinica.</p>
+              </div>
+              <div class="card-body">
+                <form id="prescriptionForm">
+                  <div class="form-grid">
+                    <div class="full">
+                      <label for="prescriptionPatient">Paciente</label>
+                      <select id="prescriptionPatient" required></select>
+                    </div>
+                    <div>
+                      <label for="prescriptionMedicationName">Medicamento</label>
+                      <input id="prescriptionMedicationName" required />
+                    </div>
+                    <div>
+                      <label for="prescriptionMedicationCode">Codigo</label>
+                      <input id="prescriptionMedicationCode" required />
+                    </div>
+                    <div>
+                      <label for="prescriptionDose">Dosis</label>
+                      <input id="prescriptionDose" required />
+                    </div>
+                    <div>
+                      <label for="prescriptionFrequency">Frecuencia</label>
+                      <input id="prescriptionFrequency" required />
+                    </div>
+                    <div>
+                      <label for="prescriptionStartDate">Inicio</label>
+                      <input id="prescriptionStartDate" type="date" required />
+                    </div>
+                    <div>
+                      <label for="prescriptionEndDate">Fin</label>
+                      <input id="prescriptionEndDate" type="date" required />
+                    </div>
+                    <div class="full">
+                      <label for="prescriptionCreatedBy">Profesional responsable</label>
+                      <input id="prescriptionCreatedBy" required />
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn btn-primary" type="submit" id="savePrescriptionBtn">Guardar prescripcion</button>
+                    <button class="btn btn-neutral" type="button" id="resetPrescriptionForm">Limpiar</button>
+                  </div>
+                  <div id="prescriptionMessage" class="message"></div>
+                </form>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h4>Prescripciones del paciente</h4>
+                <p>Selecciona una prescripcion para editarla.</p>
+              </div>
+              <div class="card-body">
+                <div id="prescriptionsTable" class="table-wrap"></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="alerts" class="section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Seguridad y trazabilidad</p>
+              <h3>Alertas medicas</h3>
+              <p class="section-desc">Interacciones y alertas generadas por el motor clinico al registrar prescripciones.</p>
+            </div>
+          </div>
+
+          <article class="card">
+            <div class="card-head">
+              <h4>Alertas registradas</h4>
+              <p>Estas alertas apoyan el seguimiento clinico y la toma de decisiones.</p>
+            </div>
+            <div class="card-body">
+              <div id="alertsTable" class="table-wrap"></div>
+            </div>
+          </article>
+        </section>
+      </div>
+    </main>
   </div>
 
-</div>
+  <script>
+    const API = {
+      patients: "/api/patients",
+      histories: "/api/composite/histories",
+      prescriptions: "/api/prescriptions",
+      builderPrescriptions: "/api/builder/prescriptions",
+      interactions: "/api/interactions"
+    };
 
-<script>
-  function loadPage(page, btn) {
-    const viewer = document.getElementById("viewer");
-    const welcome = document.getElementById("welcome");
+    const sectionMeta = {
+      summary: ["Resumen general", "Indicadores globales del sistema clinico."],
+      "patient-management": ["Registro y gestion de pacientes", "Creacion y actualizacion de datos basicos."],
+      "patient-search": ["Consulta de pacientes registrados", "Busqueda rapida y seleccion de paciente activo."],
+      "history-create": ["Creacion de historias clinicas", "Diagnostico y tratamiento en un flujo clinico."],
+      "history-view": ["Historias clinicas por paciente", "Consulta ordenada de registros clinicos."],
+      prescriptions: ["Prescripciones", "Registro, consulta y edicion de tratamientos."],
+      alerts: ["Alertas medicas", "Trazabilidad de interacciones y alertas."]
+    };
 
-    viewer.src = page;
-    viewer.classList.add("visible");
-    welcome.style.display = "none";
+    const state = {
+      patients: [],
+      histories: [],
+      prescriptions: [],
+      interactions: [],
+      selectedPatientId: "",
+      editingPatientId: "",
+      editingPrescriptionId: ""
+    };
 
-    document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
-    if (btn) btn.classList.add("active");
-  }
-</script>
+    const $ = id => document.getElementById(id);
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function patientName(patient) {
+      return `${patient?.firstName || ""} ${patient?.lastName || ""}`.trim() || "Paciente sin nombre";
+    }
+
+    function selectedPatient() {
+      return state.patients.find(patient => patient.id === state.selectedPatientId) || null;
+    }
+
+    function showMessage(id, text, type = "ok") {
+      const node = $(id);
+      node.textContent = text;
+      node.className = `message show ${type}`;
+    }
+
+    function clearMessage(id) {
+      const node = $(id);
+      node.textContent = "";
+      node.className = "message";
+    }
+
+    function setConnection(online) {
+      const status = $("connectionStatus");
+      status.classList.toggle("offline", !online);
+      status.querySelector("span:last-child").textContent = online ? "Backend conectado" : "Backend no disponible";
+    }
+
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+      const text = await response.text();
+      let data = null;
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+      }
+      if (!response.ok) {
+        throw new Error(data?.message || data || `Error HTTP ${response.status}`);
+      }
+      return data;
+    }
+
+    async function refreshAllData() {
+      try {
+        const [patients, histories, prescriptions, interactions] = await Promise.all([
+          requestJson(API.patients),
+          requestJson(API.histories),
+          requestJson(API.prescriptions),
+          requestJson(API.interactions)
+        ]);
+        state.patients = Array.isArray(patients) ? patients : [];
+        state.histories = Array.isArray(histories) ? histories : [];
+        state.prescriptions = Array.isArray(prescriptions) ? prescriptions : [];
+        state.interactions = Array.isArray(interactions) ? interactions : [];
+
+        if (state.selectedPatientId && !state.patients.some(patient => patient.id === state.selectedPatientId)) {
+          state.selectedPatientId = "";
+        }
+
+        populatePatientSelects();
+        renderAll();
+        setConnection(true);
+      } catch (error) {
+        setConnection(false);
+        console.error(error);
+      }
+    }
+
+    function populatePatientSelects() {
+      const selects = [$("historyPatient"), $("historyViewPatient"), $("prescriptionPatient")];
+      selects.forEach(select => {
+        const current = select.value || state.selectedPatientId;
+        select.innerHTML = "<option value=''>Seleccione un paciente</option>" + state.patients.map(patient => `
+          <option value="${escapeHtml(patient.id)}">${escapeHtml(patientName(patient))} - ${escapeHtml(patient.dni || "Sin DNI")}</option>
+        `).join("");
+        select.value = state.patients.some(patient => patient.id === current) ? current : state.selectedPatientId;
+      });
+    }
+
+    function setActivePatient(patientId) {
+      state.selectedPatientId = patientId || "";
+      populatePatientSelects();
+      renderAll();
+    }
+
+    function switchSection(sectionId) {
+      document.querySelectorAll(".section").forEach(section => section.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+      $(sectionId).classList.add("active");
+      document.querySelector(`[data-section="${sectionId}"]`)?.classList.add("active");
+      $("pageTitle").textContent = sectionMeta[sectionId][0];
+      $("pageSubtitle").textContent = sectionMeta[sectionId][1];
+    }
+
+    function patientMatches(patient, query) {
+      const value = `${patientName(patient)} ${patient.dni || ""} ${patient.gender || ""}`.toLowerCase();
+      return value.includes(query.trim().toLowerCase());
+    }
+
+    function renderPatientRows(containerId, query, includeEdit) {
+      const patients = state.patients.filter(patient => patientMatches(patient, query));
+      if (!patients.length) {
+        $(containerId).innerHTML = "<p class='empty'>No hay pacientes para mostrar.</p>";
+        return;
+      }
+
+      $(containerId).innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Documento</th>
+              <th>Nacimiento</th>
+              <th>Genero</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${patients.map(patient => `
+              <tr>
+                <td><strong>${escapeHtml(patientName(patient))}</strong></td>
+                <td>${escapeHtml(patient.dni || "")}</td>
+                <td>${escapeHtml(patient.birthDate || "")}</td>
+                <td>${escapeHtml(patient.gender || "")}</td>
+                <td>
+                  <div class="row-actions">
+                    <button class="mini-btn primary" data-action="select-patient" data-id="${escapeHtml(patient.id)}">Seleccionar</button>
+                    ${includeEdit ? `<button class="mini-btn warn" data-action="edit-patient" data-id="${escapeHtml(patient.id)}">Editar</button>` : ""}
+                  </div>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderSummary() {
+      $("statPatients").textContent = state.patients.length;
+      $("statHistories").textContent = state.histories.length;
+      $("statPrescriptions").textContent = state.prescriptions.length;
+      $("statAlerts").textContent = state.interactions.length;
+
+      $("summaryPatients").innerHTML = state.patients.slice(-5).reverse().map(patient => `
+        <article class="timeline-item">
+          <p class="timeline-title">${escapeHtml(patientName(patient))}</p>
+          <p class="timeline-text">DNI ${escapeHtml(patient.dni || "Sin registrar")} · ${escapeHtml(patient.gender || "Sin genero")}</p>
+        </article>
+      `).join("") || "<p class='empty'>Aun no hay pacientes registrados.</p>";
+
+      $("summaryHistories").innerHTML = state.histories.slice(0, 5).map(history => `
+        <article class="timeline-item">
+          <p class="timeline-title">${escapeHtml(history.patientName || "Paciente")}</p>
+          <p class="timeline-text">${escapeHtml(history.diagnoses || "Sin diagnostico")}</p>
+        </article>
+      `).join("") || "<p class='empty'>Aun no hay historias clinicas.</p>";
+    }
+
+    function renderPatientTables() {
+      renderPatientRows("managementPatientsTable", $("managementSearch").value, true);
+      renderPatientRows("consultPatientsTable", $("consultSearch").value, false);
+    }
+
+    function renderActivePatient() {
+      const patient = selectedPatient();
+      $("activePatientBox").innerHTML = patient
+        ? `<strong>Paciente activo:</strong> ${escapeHtml(patientName(patient))}<br>DNI ${escapeHtml(patient.dni || "Sin registrar")}`
+        : "No hay paciente activo seleccionado.";
+    }
+
+    function renderHistoryLists() {
+      const patientId = $("historyViewPatient").value || state.selectedPatientId;
+      const histories = patientId
+        ? state.histories.filter(history => history.patientId === patientId)
+        : state.histories;
+
+      $("patientHistories").innerHTML = histories.map(history => `
+        <article class="timeline-item">
+          <p class="timeline-title">${escapeHtml(history.patientName || "Paciente")} <span class="badge">${escapeHtml((history.createdAt || "").slice(0, 10))}</span></p>
+          <p class="timeline-text"><strong>Diagnosticos:</strong>\n${escapeHtml(history.diagnoses || "")}</p>
+          <p class="timeline-text"><strong>Tratamientos:</strong>\n${escapeHtml(history.treatments || "")}</p>
+        </article>
+      `).join("") || "<p class='empty'>No hay historias clinicas para este paciente.</p>";
+
+      $("recentHistories").innerHTML = state.histories.slice(0, 6).map(history => `
+        <article class="timeline-item">
+          <p class="timeline-title">${escapeHtml(history.patientName || "Paciente")}</p>
+          <p class="timeline-text">${escapeHtml(history.diagnoses || "")}</p>
+        </article>
+      `).join("") || "<p class='empty'>Aun no hay historias clinicas registradas.</p>";
+    }
+
+    function renderPrescriptions() {
+      const patientId = $("prescriptionPatient").value || state.selectedPatientId;
+      const prescriptions = patientId
+        ? state.prescriptions.filter(prescription => prescription.patient?.id === patientId)
+        : state.prescriptions;
+
+      if (!prescriptions.length) {
+        $("prescriptionsTable").innerHTML = "<p class='empty'>No hay prescripciones para este paciente.</p>";
+        return;
+      }
+
+      $("prescriptionsTable").innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Medicamento</th>
+              <th>Dosis</th>
+              <th>Frecuencia</th>
+              <th>Periodo</th>
+              <th>Responsable</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${prescriptions.map(prescription => `
+              <tr>
+                <td><strong>${escapeHtml(prescription.medicationName || "")}</strong><br><span class="badge">${escapeHtml(prescription.medicationCode || "")}</span></td>
+                <td>${escapeHtml(prescription.dose || "")}</td>
+                <td>${escapeHtml(prescription.frequency || "")}</td>
+                <td>${escapeHtml(prescription.startDate || "")} a ${escapeHtml(prescription.endDate || "")}</td>
+                <td>${escapeHtml(prescription.createdBy || "")}</td>
+                <td><button class="mini-btn warn" data-action="edit-prescription" data-id="${escapeHtml(prescription.id)}">Editar</button></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderAlerts() {
+      if (!state.interactions.length) {
+        $("alertsTable").innerHTML = "<p class='empty'>No hay alertas registradas.</p>";
+        return;
+      }
+
+      $("alertsTable").innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Severidad</th>
+              <th>Descripcion</th>
+              <th>Regla</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${state.interactions.map(alert => `
+              <tr>
+                <td><span class="badge">${escapeHtml(alert.severity || "")}</span></td>
+                <td>${escapeHtml(alert.description || "")}</td>
+                <td>${escapeHtml(alert.ruleId || "")}</td>
+                <td>${escapeHtml((alert.detectedAt || "").slice(0, 19).replace("T", " "))}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderAll() {
+      populatePatientSelects();
+      renderSummary();
+      renderPatientTables();
+      renderActivePatient();
+      renderHistoryLists();
+      renderPrescriptions();
+      renderAlerts();
+    }
+
+    function resetPatientForm() {
+      state.editingPatientId = "";
+      $("patientForm").reset();
+      $("patientFormTitle").textContent = "Registrar paciente";
+      $("savePatientBtn").textContent = "Registrar paciente";
+      clearMessage("patientMessage");
+    }
+
+    function fillPatientForm(patientId) {
+      const patient = state.patients.find(item => item.id === patientId);
+      if (!patient) return;
+      state.editingPatientId = patient.id;
+      $("patientFirstName").value = patient.firstName || "";
+      $("patientLastName").value = patient.lastName || "";
+      $("patientDni").value = patient.dni || "";
+      $("patientBirthDate").value = patient.birthDate || "";
+      $("patientGender").value = patient.gender || "";
+      $("patientFormTitle").textContent = "Editar paciente";
+      $("savePatientBtn").textContent = "Actualizar paciente";
+      switchSection("patient-management");
+    }
+
+    async function savePatient(event) {
+      event.preventDefault();
+      const payload = {
+        firstName: $("patientFirstName").value.trim(),
+        lastName: $("patientLastName").value.trim(),
+        dni: $("patientDni").value.trim(),
+        birthDate: $("patientBirthDate").value || null,
+        gender: $("patientGender").value
+      };
+
+      try {
+        const isEditing = Boolean(state.editingPatientId);
+        const saved = await requestJson(isEditing ? `${API.patients}/${state.editingPatientId}` : API.patients, {
+          method: isEditing ? "PUT" : "POST",
+          body: JSON.stringify(payload)
+        });
+        state.selectedPatientId = saved.id;
+        resetPatientForm();
+        showMessage("patientMessage", isEditing ? "Paciente actualizado correctamente." : "Paciente registrado correctamente.", "ok");
+        await refreshAllData();
+      } catch (error) {
+        showMessage("patientMessage", `No se pudo guardar el paciente: ${error.message}`, "error");
+      }
+    }
+
+    function prescriptionPayload(prefix) {
+      return {
+        patientId: $(prefix + "Patient").value || state.selectedPatientId,
+        medicationName: $(prefix + "MedicationName").value.trim(),
+        medicationCode: $(prefix + "MedicationCode").value.trim(),
+        dose: $(prefix + "Dose").value.trim(),
+        frequency: $(prefix + "Frequency").value.trim(),
+        startDate: $(prefix + "StartDate").value,
+        endDate: $(prefix + "EndDate").value,
+        createdBy: $(prefix + "CreatedBy").value.trim()
+      };
+    }
+
+    async function saveHistory(event) {
+      event.preventDefault();
+      const payload = prescriptionPayload("history");
+      if (!payload.patientId) {
+        showMessage("historyMessage", "Selecciona un paciente para crear la historia clinica.", "warn");
+        return;
+      }
+
+      const diagnosis = `${$("diagnosisName").value.trim()} | ${$("diagnosisPriority").value} | ${$("diagnosisDetail").value.trim()}`;
+      const treatment = `${payload.medicationName} | ${payload.dose} | ${payload.frequency} | ${payload.startDate} a ${payload.endDate} | Responsable: ${payload.createdBy}`;
+
+      try {
+        await requestJson(API.builderPrescriptions, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        await requestJson(API.histories, {
+          method: "POST",
+          body: JSON.stringify({
+            patientId: payload.patientId,
+            diagnoses: diagnosis,
+            treatments: treatment
+          })
+        });
+        state.selectedPatientId = payload.patientId;
+        $("historyForm").reset();
+        setDefaultDates();
+        loadHistoryExample(false);
+        showMessage("historyMessage", "Historia clinica creada con diagnostico y prescripcion asociada.", "ok");
+        await refreshAllData();
+      } catch (error) {
+        showMessage("historyMessage", `No se pudo guardar la historia clinica: ${error.message}`, "error");
+      }
+    }
+
+    function resetPrescriptionForm() {
+      state.editingPrescriptionId = "";
+      $("prescriptionForm").reset();
+      $("prescriptionPatient").value = state.selectedPatientId;
+      $("prescriptionFormTitle").textContent = "Nueva prescripcion";
+      $("savePrescriptionBtn").textContent = "Guardar prescripcion";
+      setDefaultDates();
+      clearMessage("prescriptionMessage");
+    }
+
+    function fillPrescriptionForm(prescriptionId) {
+      const prescription = state.prescriptions.find(item => item.id === prescriptionId);
+      if (!prescription) return;
+      state.editingPrescriptionId = prescription.id;
+      state.selectedPatientId = prescription.patient?.id || state.selectedPatientId;
+      $("prescriptionPatient").value = state.selectedPatientId;
+      $("prescriptionMedicationName").value = prescription.medicationName || "";
+      $("prescriptionMedicationCode").value = prescription.medicationCode || "";
+      $("prescriptionDose").value = prescription.dose || "";
+      $("prescriptionFrequency").value = prescription.frequency || "";
+      $("prescriptionStartDate").value = prescription.startDate || "";
+      $("prescriptionEndDate").value = prescription.endDate || "";
+      $("prescriptionCreatedBy").value = prescription.createdBy || "";
+      $("prescriptionFormTitle").textContent = "Editar prescripcion";
+      $("savePrescriptionBtn").textContent = "Actualizar prescripcion";
+      switchSection("prescriptions");
+    }
+
+    async function savePrescription(event) {
+      event.preventDefault();
+      const payload = prescriptionPayload("prescription");
+      if (!payload.patientId) {
+        showMessage("prescriptionMessage", "Selecciona un paciente para guardar la prescripcion.", "warn");
+        return;
+      }
+
+      try {
+        const isEditing = Boolean(state.editingPrescriptionId);
+        await requestJson(isEditing ? `${API.prescriptions}/${state.editingPrescriptionId}` : API.builderPrescriptions, {
+          method: isEditing ? "PUT" : "POST",
+          body: JSON.stringify(payload)
+        });
+        state.selectedPatientId = payload.patientId;
+        resetPrescriptionForm();
+        showMessage("prescriptionMessage", isEditing ? "Prescripcion actualizada correctamente." : "Prescripcion registrada correctamente.", "ok");
+        await refreshAllData();
+      } catch (error) {
+        showMessage("prescriptionMessage", `No se pudo guardar la prescripcion: ${error.message}`, "error");
+      }
+    }
+
+    function setDefaultDates() {
+      const today = new Date();
+      const nextMonth = new Date(today);
+      nextMonth.setMonth(today.getMonth() + 1);
+      const start = today.toISOString().slice(0, 10);
+      const end = nextMonth.toISOString().slice(0, 10);
+      ["historyStartDate", "prescriptionStartDate"].forEach(id => $(id).value ||= start);
+      ["historyEndDate", "prescriptionEndDate"].forEach(id => $(id).value ||= end);
+    }
+
+    function loadHistoryExample(overwrite = true) {
+      if (!overwrite && $("diagnosisName").value) return;
+      $("diagnosisName").value = "Hipertension arterial";
+      $("diagnosisPriority").value = "Seguimiento";
+      $("diagnosisDetail").value = "Paciente con cifras tensionales elevadas. Se indica control farmacologico y seguimiento.";
+      $("historyMedicationName").value = "Losartan";
+      $("historyMedicationCode").value = "MED-LOS-50";
+      $("historyDose").value = "50 mg";
+      $("historyFrequency").value = "Cada 24 horas";
+      $("historyCreatedBy").value = "Dr. Responsable";
+      setDefaultDates();
+    }
+
+    document.querySelectorAll(".nav-btn").forEach(button => {
+      button.addEventListener("click", () => switchSection(button.dataset.section));
+    });
+
+    document.querySelectorAll("[data-go-section]").forEach(button => {
+      button.addEventListener("click", () => switchSection(button.dataset.goSection));
+    });
+
+    document.body.addEventListener("click", event => {
+      const actionButton = event.target.closest("[data-action]");
+      if (!actionButton) return;
+      const { action, id } = actionButton.dataset;
+      if (action === "select-patient") {
+        setActivePatient(id);
+      }
+      if (action === "edit-patient") {
+        fillPatientForm(id);
+      }
+      if (action === "edit-prescription") {
+        fillPrescriptionForm(id);
+      }
+    });
+
+    $("patientForm").addEventListener("submit", savePatient);
+    $("resetPatientForm").addEventListener("click", resetPatientForm);
+    $("managementSearch").addEventListener("input", renderPatientTables);
+    $("consultSearch").addEventListener("input", renderPatientTables);
+    $("refreshPatients").addEventListener("click", refreshAllData);
+    $("refreshAll").addEventListener("click", refreshAllData);
+    $("historyForm").addEventListener("submit", saveHistory);
+    $("loadHistoryExample").addEventListener("click", () => loadHistoryExample(true));
+    $("historyPatient").addEventListener("change", event => setActivePatient(event.target.value));
+    $("historyViewPatient").addEventListener("change", event => {
+      setActivePatient(event.target.value);
+      renderHistoryLists();
+    });
+    $("reloadHistories").addEventListener("click", refreshAllData);
+    $("prescriptionForm").addEventListener("submit", savePrescription);
+    $("resetPrescriptionForm").addEventListener("click", resetPrescriptionForm);
+    $("prescriptionPatient").addEventListener("change", event => {
+      setActivePatient(event.target.value);
+      renderPrescriptions();
+    });
+
+    setDefaultDates();
+    loadHistoryExample(true);
+    refreshAllData();
+  </script>
 </body>
 </html>

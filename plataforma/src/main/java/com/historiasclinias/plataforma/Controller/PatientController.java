@@ -30,4 +30,9 @@ public class PatientController {
         if (p == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(p);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Patient> update(@PathVariable UUID id, @RequestBody Patient patient) {
+        return ResponseEntity.ok(service.update(id, patient));
+    }
 }
